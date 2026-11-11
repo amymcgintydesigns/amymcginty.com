@@ -10,6 +10,7 @@
 <style>
   :root {
     --bg: #2f6bff; /* resting page color: the blue of A (keep in sync with COLORS.A) */
+    --a-color: #08155a;   /* what the letter A shows: deep navy on the resting blue (so it stands apart), its own blue once the page tints */
     --fg: #fff;
     --muted: rgba(255,255,255,.94);
     --line: rgba(255,255,255,.18);
@@ -39,6 +40,10 @@
   @keyframes flowdrift { from { translate: 0 0; } to { translate: var(--dx, 30vw) var(--dy, 20vh); } }
   @media (prefers-reduced-motion: reduce) { #flow i { animation: none; } }
   .plain #flow { display: none; }
+  #score { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 1.6s ease; }
+  #score.on { opacity: 1; }
+  #score i { position: absolute; left: 0; top: 0; width: 70vmax; height: 70vmax; margin: -35vmax 0 0 -35vmax; border-radius: 50%; background: radial-gradient(circle closest-side, var(--sc) 0%, transparent 70%); opacity: .55; will-change: transform; }
+  .plain #score, #flow.on ~ #score { display: none; }
   #aura { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
   .orb { position: absolute; border-radius: 50%; opacity: 0; filter: blur(6px); }
   nav { text-align: right; flex: 0 1 auto; max-width: min(46vw, 21rem); }
@@ -104,6 +109,8 @@
   footer { gap: 1.5rem; }
   footer .up { display: grid; place-items: center; width: 44px; height: 44px; margin: -10px -10px 0 0; align-self: flex-start; opacity: .8; transition: opacity .3s, transform .3s; }
   footer .up:hover, footer .up:focus-visible { opacity: 1; transform: translateY(-2px); }
+  footer .social.inline { margin: 0; align-self: flex-start; justify-content: center; gap: .5rem; }
+  footer .social.inline a:first-child { margin-left: 0; }
   footer .made { display: block; margin-top: .35rem; font-size: .78rem; }
 
   /* Body copy: Raleway (the same sans as the tagline). Headings and nav stay in Major Mono Display. */
@@ -130,8 +137,7 @@
   .eyes button.ko { color: #fff; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
   .eyes button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   html { transition: background-color .8s ease; }
-  html.plain { --bg: #161616; }
-  #out span, #abc span { transition: color 1.5s ease; }   /* a letter easing to white when the background drifts toward its color */
+  html.plain { --bg: #161616; --a-color: #fff; }
   .plain .l, .plain #abc span, .plain #out span { color: #fff !important; }
   .plain #aura { display: none; }
   .plain .hero .hint, .plain .alphabet, .plain .swatches, .plain .music { display: none; }   /* no perception content in Your eyes: no prompt, alphabet, palette or music */
@@ -183,6 +189,7 @@
 <body>
 <div id="aura" aria-hidden="true"></div>
 <div id="flow" aria-hidden="true"></div>
+<div id="score" aria-hidden="true"></div>
 
 <div class="page">
 <div class="namebar" aria-hidden="true"></div>
@@ -230,8 +237,8 @@
       </section>
 
       <section class="music" aria-label="Music">
-        <h2 class="syn">music</h2>
-        <p class="try">Pick a song, see its color</p>
+        <h2 class="syn">What I Hear</h2>
+        <p class="try">Listen and see</p>
         <!-- To add a song: copy one <li>. data-glow is its glow: a color like #f2506e, or a gradient like radial-gradient(ellipse closest-side, #ff2fd0 0%, #7a2bd6 100%). data-color is one color that stands for it. -->
         <ul class="results" id="songResults">
           <li><button type="button" data-title="A Case of You" data-artist="Joni Mitchell" data-color="#0a1a5c" data-glow="radial-gradient(ellipse closest-side, #b8f5d6 0%, #7fe3b4 14%, #2fa58c 28%, #0a1a5c 46%, #0a1a5c 100%)" data-q="a case of you" data-match="a case of you"><i class="dot" aria-hidden="true"></i><span><span class="t">A Case of You</span><small>Joni Mitchell</small></span></button></li>
@@ -274,16 +281,16 @@
     <div class="body">
       <p>Drop me a line or let’s chat over a coffee?</p>
       <p><a class="book" href="mailto:amcginty85@gmail.com?subject=Let%E2%80%99s%20find%20time">Let’s find time</a></p>
-      <div class="social inline">
-<a href="https://www.linkedin.com/in/amy-mcginty-poso" aria-label="LinkedIn" data-letter="N" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>
-    <a href="https://www.instagram.com/curlydays/" aria-label="Instagram" data-letter="I" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.64-.07-4.85s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.69.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.2-4.35-2.62-6.78-6.98-6.98C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/></svg></a>
-      </div>
     </div>
   </details>
 </main>
 
 <footer>
   <span>&copy; <span id="yr"></span> Amy McGinty<small class="made">** Built with AI by a HUMAN who knows what she’s doing.</small></span>
+  <div class="social inline">
+<a href="https://www.linkedin.com/in/amy-mcginty-poso" aria-label="LinkedIn" data-letter="N" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>
+    <a href="https://www.instagram.com/curlydays/" aria-label="Instagram" data-letter="I" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.64-.07-4.85s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.69.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.2-4.35-2.62-6.78-6.98-6.98C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/></svg></a>
+      </div>
   <a class="up" href="#top" aria-label="Back to top"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 15l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
 </footer>
 </div>
@@ -363,45 +370,15 @@ function compHex(hex) {                     /* the library color opposite this h
 /* The page rests on --bg, tints toward whatever you touch, then drifts home */
 const page = document.documentElement;
 let bgTimer;
-/* Background: it drifts on its own through colors from the palette (the "ambient" color); touching a letter tints it
-   toward that letter's opposite for HOLD_MS, then it eases back to wherever the drift is. */
-let ambient = "", holding = false, lastAmb = "", ambTimer;
-const curBg = () => getComputedStyle(page).backgroundColor;
-const targetBg = () => holding ? page.style.backgroundColor : (ambient || "rgb(47,107,255)");
-function setBg(color, ms) {
-  page.style.transition = "background-color " + ms + "ms ease";
-  page.style.backgroundColor = color;
-  if (color) page.style.setProperty("--bar", color); else page.style.removeProperty("--bar");
-}
 function tintPage(color) {
   if (page.classList.contains("plain")) return;
   clearTimeout(bgTimer);
-  holding = true;
-  setBg(color, 1200);
-  fixWord();
-  bgTimer = setTimeout(() => { holding = false; setBg(ambient, 2000); fixWord(); }, HOLD_MS);
+  page.style.transition = "background-color 1.2s ease";
+  page.style.backgroundColor = color;
+  page.style.setProperty("--bar", color);
+  page.style.setProperty("--a-color", COLORS.A);
+  bgTimer = setTimeout(() => { page.style.transition = "background-color 2s ease"; page.style.backgroundColor = ""; page.style.removeProperty("--bar"); page.style.removeProperty("--a-color"); }, HOLD_MS);
 }
-const AMB = lib.filter(o => o.s > .6 && luma(o.c) > 70);   /* the vivid colors of the palette (no browns or beiges) */
-const jewel = h => {                                       /* that hue as a rich, deep tone so white copy stays readable */
-  const s = .62, l = .3, c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
-  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
-  return "rgb(" + [r, g, b].map(v => Math.round((v + m) * 255)).join(",") + ")";
-};
-function ambientTick() {
-  if (page.classList.contains("plain")) return;
-  let o; do { o = AMB[Math.floor(Math.random() * AMB.length)]; } while (o.c === lastAmb && AMB.length > 1);
-  lastAmb = o.c; ambient = jewel(o.h);
-  if (!holding) setBg(ambient, 4000);
-  fixWord();
-}
-function startAmbient() {
-  clearInterval(ambTimer);
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  setTimeout(ambientTick, 2500);
-  ambTimer = setInterval(ambientTick, 8000);
-}
-document.addEventListener("eyes-plain", () => { clearInterval(ambTimer); ambient = ""; holding = false; clearTimeout(bgTimer); });
-document.addEventListener("eyes-mine", startAmbient);
 
 /* A soft bloom of color behind a letter, in a layer that sits behind all the text */
 const aura = document.getElementById("aura"), orbs = new WeakMap();
@@ -422,25 +399,18 @@ function bloom(el, hex) {
   }, HOLD_MS);
 }
 
-/* A letter shows its own color, unless that would blend into the background: then it shows white so it never disappears */
-const lumOf = ([r, g, b]) => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
-const contrast = (a, b) => { const x = lumOf(a), y = lumOf(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
-const shown = (hex, bg) => contrast(rgb(hex), (String(bg || curBg()).match(/[\d.]+/g) || [47, 107, 255]).slice(0, 3).map(Number)) < 1.5 ? "#fff" : hex;
-/* the typed word and the alphabet row re-check their letters whenever the background changes */
-function fixWord() {
-  const bg = targetBg();
-  document.querySelectorAll("[data-wc]").forEach(el => { el.style.color = shown(el.dataset.wc, bg); });
-}
+/* "A" is the same blue as the resting page, so it follows --a-color: navy on the blue page, its own blue when the page has tinted */
+const shown = (hex) => hex === COLORS.A ? "var(--a-color)" : hex;
 const timers = new WeakMap();
 function paint(el) {
   if (!el || !el.dataset || !el.dataset.c || page.classList.contains("plain")) return;
   clearTimeout(timers.get(el));
   el.style.transition = "color .12s, font-weight 1.4s ease";
-  const logo = el.closest(".logo"), opp = compHex(el.dataset.c), next = logo ? curBg() : deep(opp);
-  el.style.color = shown(el.dataset.c, next);
-  if (!logo) {                                /* the name has its own glow */
+  el.style.color = shown(el.dataset.c);
+  if (!el.closest(".logo")) {                 /* the name has its own glow */
+    const opp = compHex(el.dataset.c);
     bloom(el, opp);
-    tintPage(next);
+    if (!(el.dataset.c === COLORS.A && page.style.backgroundColor === "")) tintPage(deep(opp));   /* hovering A on the blue page keeps the page blue so A can show white */
   }
   timers.set(el, setTimeout(() => { el.style.transition = ""; el.style.color = ""; }, HOLD_MS));
 }
@@ -449,7 +419,7 @@ function glow(el) {
   if (page.classList.contains("plain")) return;
   const opp = compHex(el.dataset.c);
   bloom(el, opp);
-  tintPage(deep(opp));
+  if (!(el.dataset.c === COLORS.A && page.style.backgroundColor === "")) tintPage(deep(opp));
 }
 function hit(e) {
   const t = document.elementFromPoint(e.clientX, e.clientY);
@@ -467,10 +437,8 @@ function paintWord(text, target, hover) {
   [...text].forEach(ch => {
     const sp = document.createElement("span");
     sp.textContent = ch === " " ? "\u00A0" : ch;
-    const c = COLORS[ch.toUpperCase()];
-    sp.style.color = c ? shown(c, targetBg()) : "#fff";
-    if (c) sp.dataset.wc = c;
-    if (hover && c) { sp.className = "ol"; sp.dataset.c = c; }   /* letters of the typed word get the same hover glow as the rest of the site */
+    sp.style.color = shown(COLORS[ch.toUpperCase()]) || "#fff";
+    if (hover && COLORS[ch.toUpperCase()]) { sp.className = "ol"; sp.dataset.c = COLORS[ch.toUpperCase()]; }   /* letters of the typed word get the same hover glow as the rest of the site */
     target.append(sp);
   });
 }
@@ -728,7 +696,7 @@ if (location.hash) openPanel(location.hash.slice(1), false);
   const set = (plain, save) => {
     if (plain) {                                   /* drop any tint or glow that is mid-fade */
       clearTimeout(bgTimer);
-      page.style.backgroundColor = ""; page.style.removeProperty("--bar");
+      page.style.backgroundColor = ""; page.style.removeProperty("--bar"); page.style.removeProperty("--a-color");
       document.querySelectorAll("#aura .orb").forEach(o => o.remove());
     }
     page.classList.toggle("plain", plain);
@@ -784,7 +752,23 @@ if (location.hash) openPanel(location.hash.slice(1), false);
   update();
 })();
 
-if (!page.classList.contains("plain")) startAmbient();   /* the background starts drifting through the palette */
+
+/* Color score: while you move, a soft gradient of my palette follows the pointer across the whole screen, each color trailing a little behind the last; it fades once you stop */
+(function colorScore() {
+  const box = document.getElementById("score"); if (!box || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const hexes = ["#ff2fd0", "#ffb000", "#00c2a8", "#7a3cff"];
+  const blobs = hexes.map(h => { const i = document.createElement("i"); i.style.setProperty("--sc", h); box.appendChild(i); return { el: i, x: innerWidth / 2, y: innerHeight / 2 }; });
+  let tx = innerWidth / 2, ty = innerHeight / 2, idle, raf = 0;
+  const move = (x, y) => { tx = x; ty = y; box.classList.add("on"); clearTimeout(idle); idle = setTimeout(() => box.classList.remove("on"), 2500); if (!raf) raf = requestAnimationFrame(tick); };
+  function tick() {
+    let lx = tx, ly = ty, moving = false;
+    blobs.forEach((b, i) => { const k = 0.06 - i * 0.012; b.x += (lx - b.x) * k; b.y += (ly - b.y) * k; b.el.style.transform = `translate(${b.x}px,${b.y}px)`; lx = b.x; ly = b.y; if (Math.abs(tx - b.x) + Math.abs(ty - b.y) > 1) moving = true; });
+    raf = moving ? requestAnimationFrame(tick) : 0;
+  }
+  addEventListener("pointermove", e => move(e.clientX, e.clientY), { passive: true });
+  addEventListener("pointerdown", e => move(e.clientX, e.clientY), { passive: true });
+  addEventListener("eyes-plain", () => box.classList.remove("on"));
+})();
 </script>
 </body>
 </html>
