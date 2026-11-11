@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Amy McGinty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Major+Mono+Display&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --a-color: #08155a;   /* what the letter A shows: deep navy on the resting blue (so it stands apart), its own blue once the page tints */
+    --bg: #2f6bff; /* resting page color: the blue of A (keep in sync with COLORS.A) */
+    --fg: #fff;
+    --muted: rgba(255,255,255,.94);
+    --line: rgba(255,255,255,.18);
+    --pad: clamp(1.25rem, 4vw, 3rem);
+    --serif: "Major Mono Display", "Courier New", Courier, monospace;
+    --w: 400; /* current hero weight, changed by script */
+  }
+  .major-mono-display-regular { font-family: "Major Mono Display", monospace; font-weight: 400; font-style: normal; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body { margin: 0; position: relative; background: transparent; color: var(--fg); font-family: var(--serif); font-size: clamp(.95rem, 1.3vw, 1.1rem); line-height: 1.85; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+
+  /* ---------- Header: logo left, nav right ---------- */
+  .top { position: absolute; inset: 0 0 auto 0; z-index: 5; display: flex; justify-content: flex-end; align-items: flex-start; gap: 1.5rem; padding: calc(var(--pad) * .8) var(--pad); padding-top: max(calc(var(--pad) * .8), env(safe-area-inset-top)); }
+  .logo { text-decoration: none; font-size: clamp(1.1rem, 2.8vw, 1.7rem); line-height: 1.2; position: fixed; left: var(--pad); top: max(calc(var(--pad) * .8), env(safe-area-inset-top)); z-index: 6; max-width: 50vw; opacity: 0; pointer-events: none; transition: opacity .5s ease; }   /* pinned top left; hidden on the hero, shown once you scroll past it */
+  .logo.show { opacity: 1; pointer-events: auto; }
+  .namebar { position: fixed; top: 0; left: 0; right: 0; z-index: 4; height: calc(max(calc(var(--pad) * .8), env(safe-area-inset-top)) + clamp(1.1rem, 2.8vw, 1.7rem) * 1.2 + var(--pad) * .8); background: var(--bar, var(--bg)); opacity: 0; pointer-events: none; transition: opacity .5s ease, background-color 1.2s ease; }   /* full-width strip behind the pinned name; takes the page's current color */
+  .namebar.show { opacity: 1; }
+  .logo::before { content: ""; position: absolute; inset: -95% -45%; z-index: -1; background: var(--glow, #2f6bff); opacity: 0; -webkit-mask-image: radial-gradient(ellipse at center, #000 0%, transparent 68%); mask-image: radial-gradient(ellipse at center, #000 0%, transparent 68%); transition: background-color .4s ease, opacity 1.6s ease; }
+  .logo.glow::before { opacity: .4; transition: background-color .4s ease, opacity .3s ease; }
+  #aura { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
+  .orb { position: absolute; border-radius: 50%; opacity: 0; filter: blur(6px); }
+  nav { text-align: right; flex: 0 1 auto; max-width: min(46vw, 21rem); }
+  nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: flex-end; gap: .15rem; }
+  nav a { display: block; text-decoration: none; font-size: 1.05rem; line-height: 1.35; font-weight: 400; padding: .1rem 0; }
+
+  /* ---------- Hero ---------- */
+  .hero { position: relative; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 6rem var(--pad); }
+  .hero h1 { margin: 0; text-align: center; font-size: clamp(2.8rem, 10.5vw, 9.5rem); line-height: 1.15; font-weight: var(--w); max-width: min(92vw, 1200px); text-wrap: balance; transition: opacity .6s ease; }
+  .hero h1.long { font-size: clamp(2.1rem, 7.2vw, 6.8rem); }
+
+  /* every letter inside .syn becomes a span.l */
+  .w { display: inline-block; white-space: nowrap; }
+  .l { font-weight: inherit; transition: color 1.6s ease, font-weight 1.4s ease; }
+  .hero h1 .l { font-weight: var(--w); display: inline-block; }
+  .hero-text { position: relative; }
+  .hint { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: max-content; max-width: 90vw; margin: 0; padding-top: clamp(1.5rem, 3.5vw, 2.5rem); text-align: center; font-size: clamp(1.3rem, 3vw, 2rem); font-weight: 400; line-height: 1.4; color: var(--muted); transition: opacity 1.2s ease; pointer-events: none; }
+  .hint { letter-spacing: normal; }
+  .hint .l { pointer-events: auto; }
+  .hint .tag { display: block; margin-top: .6rem; font-family: var(--sans); font-size: .8rem; letter-spacing: normal; }
+  .social { position: absolute; left: 0; right: 0; bottom: max(1.75rem, env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 1.5rem; }
+  .social a { display: grid; place-items: center; width: 44px; height: 44px; color: #fff; opacity: 1; transition: opacity .3s, transform .3s, color .25s; }
+  .social a:hover, .social a:focus-visible { opacity: 1; transform: scale(1.15); }
+  .social svg { width: 24px; height: 24px; fill: currentColor; }
+
+  /* ---------- Sections as accordion panels ---------- */
+  main { max-width: 1100px; margin: 0 auto; padding: 0 var(--pad); }
+  .panel .body .alphabet { font-family: var(--serif); max-width: none; margin: 2.5rem 0 1rem; }
+  .panel { border-top: 1px solid var(--line); scroll-margin-top: 1rem; }
+  .panel:last-of-type { border-bottom: 1px solid var(--line); }
+  .panel > summary { list-style: none; cursor: pointer; display: flex; justify-content: flex-start; column-gap: .35em; align-items: baseline; padding: 1.6rem 0; font-size: clamp(1.4rem, 4vw, 2.6rem); font-weight: 400; line-height: 1.1; }
+  .panel > summary::-webkit-details-marker { display: none; }
+  .panel > summary::after { content: "+"; margin-left: auto; font-weight: 300; transition: transform .35s; }
+  #work > summary .t-closed, #work[open] > summary .t-open { display: contents; }   /* title swaps when the accordion opens: "work" → "Brands I’ve worked with" */
+  #work > summary .t-open, #work[open] > summary .t-closed { display: none; }
+  .panel[open] > summary::after { transform: rotate(45deg); }
+  .panel .body { padding: 0 0 3rem; max-width: 68ch; color: var(--muted); }
+  .panel .body p { margin: 0 0 1em; }
+  main { padding-top: clamp(3rem, 8vw, 6rem); }
+  .intro { font-size: clamp(1.1rem, 2.4vw, 1.8rem); line-height: 1.55; max-width: 38ch; margin: 0 0 clamp(3rem, 7vw, 5rem); }
+  .alphabet { margin: 0 0 clamp(3rem, 7vw, 5rem); }
+  .panel .body .awards { font-family: var(--serif); max-width: none; margin: clamp(3rem, 7vw, 4.5rem) 0 1rem; }
+  .awards { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem 1.75rem; }
+  .awards h3 { flex: 0 0 100%; margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(1.2rem, 2.8vw, 1.8rem); line-height: 1.2; color: var(--fg); }
+  .awards .brands { display: block; margin: 0; width: auto; }
+  .awards .brands li { width: auto; min-height: 0; }
+  .awards .brands img { height: 64px; }
+  .awards .award-copy { margin: 0; font-family: var(--sans); font-size: 1rem; line-height: 1.55; max-width: 52ch; }
+  .alphabet h2, .music h2, .swatches h2 { font-size: clamp(1.4rem, 4vw, 2.6rem); font-weight: 400; line-height: 1.1; margin: 0 0 1.5rem; }
+  .abc { display: flex; flex-wrap: wrap; gap: .1rem .7rem; font-size: clamp(1.5rem, 5vw, 2.6rem); line-height: 1.25; }
+  .try { display: block; margin: 2.25rem 0 .4rem; color: var(--muted); font-size: .9rem; }
+  #word::placeholder { color: #fff; opacity: .25; font-size: .75em; }   /* placeholder 25% smaller; the typed text stays full size so phones do not zoom in */
+  #word { width: 100%; max-width: 640px; background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; color: #fff; font: inherit; font-size: 16px; padding: .5rem 0; }   /* was 17.6px (about 10% smaller); 16px is the floor that keeps iPhones from zooming in */
+  #word:focus, #word:focus-visible { outline: none; }
+  .out { font-size: clamp(1.4rem, 5.76vw, 3.84rem); line-height: 1.15; min-height: 1.2em; margin-top: 1rem; overflow-wrap: anywhere; }
+  .panel .body.wide { max-width: none; }
+  .contact a.book { display: inline-block; margin-top: .5rem; padding: .85rem 2.2rem; border: 1px solid var(--fg); border-radius: 999px; font-family: var(--sans); font-size: 1.05rem; line-height: 1; color: var(--fg); text-decoration: none; transition: background-color .3s, color .3s; }
+  .contact a.book:hover, .contact a.book:focus-visible { background: rgba(255,255,255,.14); }
+  .contact a.mail { font-size: clamp(1.4rem, 4vw, 2.2rem); font-weight: 700; color: var(--fg); }
+  footer { max-width: 1100px; margin: 0 auto; padding: 2.5rem var(--pad) 3rem; display: flex; justify-content: space-between; color: var(--muted); font-size: .95rem; }
+  footer a { text-decoration: none; white-space: nowrap; }
+  footer { gap: 1.5rem; }
+  footer .up { display: grid; place-items: center; width: 44px; height: 44px; margin: -10px -10px 0 0; align-self: flex-start; opacity: .8; transition: opacity .3s, transform .3s; }
+  footer .up:hover, footer .up:focus-visible { opacity: 1; transform: translateY(-2px); }
+  footer .made { display: block; margin-top: .35rem; font-size: .78rem; }
+
+  /* Body copy: Raleway (the same sans as the tagline). Headings and nav stay in Major Mono Display. */
+  :root { --sans: "Raleway", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .panel .body, .intro, .try, #word, footer { font-family: var(--sans); font-weight: 400; font-optical-sizing: auto; }
+  .panel .body { font-size: clamp(1rem, 1.3vw, 1.125rem); line-height: 1.7; }
+  .intro { font-size: clamp(1.15rem, 2.3vw, 1.65rem); line-height: 1.5; }
+  .try, footer { font-size: .95rem; }
+  .brands { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 3rem 2rem; align-items: center; justify-items: center; }
+  .brands li { display: flex; align-items: center; justify-content: center; min-height: 64px; width: 100%; }
+  .brands img { max-width: 100%; height: 56px; width: auto; filter: brightness(0) invert(1); opacity: .92; }
+  .brands .nm { font-family: var(--serif); font-size: clamp(1.1rem, 2.4vw, 1.5rem); text-align: center; }
+  .social.inline { position: static; justify-content: flex-start; gap: 1rem; margin-top: 1.5rem; }
+  .social.inline a:first-child { margin-left: -10px; }
+  .hero .social { bottom: calc(max(1.75rem, env(safe-area-inset-bottom)) + 4.5rem); }   /* clears the fixed My eyes / Your eyes toggle */
+  footer { padding-bottom: 6rem; }
+  /* My eyes / Your eyes: pinned toggle. "Your eyes" is the same page without my synesthesia: no letter colors, glows or tints */
+  .eyes { position: fixed; left: 50%; bottom: max(1.1rem, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 7; display: flex; padding: 4px; border: 0; border-radius: 999px; background: none; font-family: var(--sans); }
+  .eyes button { font: inherit; font-size: .9rem; line-height: 1; color: var(--fg); background: transparent; border: 0; border-radius: 999px; padding: .65rem 1.2rem; cursor: pointer; opacity: .75; transition: background-color .3s, color .3s, opacity .3s; white-space: nowrap; }
+  .eyes button:not([aria-pressed="true"]) { text-decoration: underline; text-underline-offset: .35em; text-decoration-thickness: 1px; }
+  .eyes button:hover { opacity: 1; }
+  .eyes button[aria-pressed="true"] { background: #fff; color: var(--bar, var(--bg)); opacity: 1; }   /* always the current page color; blue is just where it starts */
+  /* knockout: the label is cut out of the white pill (built in JS), so whatever is behind the page shows through the letters */
+  .eyes button.ko { color: #fff; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+  .eyes button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  html { transition: background-color .8s ease; }
+  html.plain { --bg: #161616; --a-color: #fff; }
+  .plain .l, .plain #abc span, .plain #out span { color: #fff !important; }
+  .plain #aura { display: none; }
+  .plain .hero .hint, .plain .alphabet, .plain .swatches, .plain .music { display: none; }   /* no perception content in Your eyes: no prompt, alphabet, palette or music */
+  .plain .chips, .plain .music { filter: grayscale(1); }
+  .page { position: relative; overflow-x: clip; }   /* soft glows may reach past the screen edge without making the page scroll sideways */
+  .panel .body .music { font-family: var(--serif); max-width: none; margin: 45px 0 1rem; }
+  .music button { font-family: var(--sans); font-size: .95rem; line-height: 1; color: var(--fg); background: transparent; border: 1px solid var(--fg); border-radius: 999px; padding: .65rem 1.3rem; cursor: pointer; transition: background-color .3s; }
+  .music button:hover, .music button:focus-visible { background: rgba(255,255,255,.14); }
+  .music .status { min-height: 1.5em; margin: .7rem 0 0; font-family: var(--sans); font-size: .9rem; color: var(--muted); }
+  .music .results { list-style: none; margin: .4rem 0 0; padding: 0; max-width: 640px; font-family: var(--sans); }
+  .music .results li { border-top: 1px solid var(--line); }
+  .music .results li:last-child { border-bottom: 1px solid var(--line); }
+  .music .results button { display: flex; align-items: center; gap: .9rem; width: 100%; text-align: left; border: 0; border-radius: 0; padding: .6rem 0; font: inherit; font-size: 1rem; line-height: 1.3; }
+  .music .results small { display: block; font-size: .85rem; opacity: .8; }
+  .music .results .t { display: block; }
+  .music .results .dot { width: 40px; height: 40px; margin: -8px; flex: none; background: var(--dot, var(--c, #fff)); -webkit-mask-image: radial-gradient(circle at center, #000 0%, transparent 68%); mask-image: radial-gradient(circle at center, #000 0%, transparent 68%); }   /* a small soft bloom: the same colors as the song's glow, no outline */
+  .music .results button { padding: .85rem .4rem; }
+  .music .results button:hover, .music .results button:focus-visible, .music .results button.active { background: none; }
+  .music .results button:hover .t, .music .results button:focus-visible .t, .music .results button.active .t { font-weight: 700; }   /* hover (and the playing song) goes bold, no box */
+  .now { position: relative; display: flex; align-items: center; gap: 1rem; max-width: 640px; margin-top: 2.5rem; padding: 1rem 0; font-family: var(--sans); }
+  .now[hidden] { display: none; }
+  .now::before { content: ""; position: absolute; inset: -150% -45%; z-index: -1; pointer-events: none; background: var(--song-bg, var(--song, #fff)); opacity: 0; -webkit-mask-image: radial-gradient(ellipse at center, #000 0%, transparent 66%); mask-image: radial-gradient(ellipse at center, #000 0%, transparent 66%); transition: background-color 1.2s ease, opacity 1.2s ease; }
+  .now.playing::before { opacity: .9; animation: songpulse 2.6s ease-in-out infinite; }
+  @keyframes songpulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+  .now img { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; flex: none; background: rgba(255,255,255,.12); }
+  .now .meta { display: grid; gap: .1rem; min-width: 0; flex: 1; line-height: 1.3; }
+  .now .meta, .now button { }
+  .now.swap::before { opacity: 0 !important; transition: opacity .25s ease; }   /* brief fade-out so the glow changes smoothly between songs */
+  .now .meta strong { font-size: 1.1rem; font-weight: 700; overflow-wrap: anywhere; }
+  .now .meta span { font-size: .95rem; }
+  .now .meta small { opacity: .75; font-size: .8rem; }
+  .panel .body .swatches { font-family: var(--serif); max-width: none; margin: 3.5rem 0 1rem; }
+  .chips { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 1rem; font-family: var(--sans); }
+  .chip { background: #fff; color: #111; outline: 1px solid rgba(255,255,255,.7); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }   /* a paint-chip card: color on top, white label below */
+  .chip .block { position: relative; display: block; aspect-ratio: 1 / 1; background: var(--chip); }
+  .chip .ch { position: absolute; left: .5rem; top: .35rem; font-family: var(--sans); font-size: 1.1rem; line-height: 1.2; font-weight: 500; color: var(--on, #fff); }
+  .chip .label { display: block; padding: .5rem .5rem .6rem; line-height: 1.25; text-align: left; }
+  .chip .pt { display: block; font-size: .64rem; font-weight: 700; letter-spacing: .01em; }
+  .chip .code { display: block; margin-top: .1rem; font-size: .58rem; font-weight: 400; color: #333; }
+  .chip .nm { display: block; margin-top: .05rem; font-size: .66rem; font-weight: 700; }
+  .chip:hover .ch { font-weight: 700; }
+  .swatches .fine { max-width: 62ch; margin: 0; padding-top: 25px; font-family: var(--sans); font-size: .66rem; line-height: 1.5; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) {
+    .l, .panel > summary::after { transition: none; }
+    .now.playing::before { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div id="aura" aria-hidden="true"></div>
+
+<div class="page">
+<div class="namebar" aria-hidden="true"></div>
+<header class="top">
+  <a class="logo syn" href="#top" aria-label="Amy McGinty, back to top">Amy McGinty</a>
+  <nav aria-label="Main">
+    <ul>
+      <!-- To add a page section: add a <li> here and a matching <details class="panel" id="..."> below -->
+      <li><a href="#about">About me</a></li>
+      <li><a href="#work">work</a></li>
+      <li><a href="#contact">contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero-text">
+    <h1 class="syn">Amy McGinty</h1>
+    <h2 class="hint syn" id="hint">Move. Tap. Type.</h2>
+  </div>
+  <div class="social">
+    <a href="https://www.linkedin.com/in/amy-mcginty-poso" aria-label="LinkedIn" data-letter="N" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>
+    <a href="https://www.instagram.com/curlydays/" aria-label="Instagram" data-letter="I" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.64-.07-4.85s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.69.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.2-4.35-2.62-6.78-6.98-6.98C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/></svg></a>
+  </div>
+</section>
+
+<main>
+  <details class="panel" id="about">
+    <summary class="syn">About me</summary>
+    <div class="body">
+      <p>Building brands people feel long before they see a logo. Fifteen years in, I still love to create. My work goes beyond shaping brand identities and systems into storytelling, capturing the human experience at the intersection of art and technology.</p>
+      <p>I see the world in color. Letters, numbers, countries and music all arrive for me already tinted, and they always have. Every name has a hue and every year has a mood. It’s how I’ve experienced life for as long as I can remember, and it shapes everything I make.</p>
+      <p>I’m an art director with ten years as a senior creative at one of the world’s leading technology companies. My work sits where people, design and technology meet. I care about the details most people never notice, because that’s usually where a brand either feels right or doesn’t. I’m serious about craft and I take the work seriously, and I’ve never lost the sense of wonder that got me into this in the first place.</p>
+      <p>Color isn’t decoration for me, it’s information. It’s how I read a room, build an identity and tell when something is finished. I’m now looking for the next step up, leading bigger ideas and the teams who bring them to life.</p>
+      <p>If you’d like to see the world the way I do, start with the letters at the top of this page.</p>
+
+      <section class="swatches" aria-label="My alphabet as color swatches">
+        <h2 class="syn">perception palette</h2>
+        <section class="alphabet" aria-label="My alphabet">
+        <div class="abc" id="abc" aria-label="Each letter and number in the color I see it"></div>
+        <label class="try" for="word">type a word, see it the way I do</label>
+        <input id="word" type="text" maxlength="24" placeholder="How I see you" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <div class="out" id="out" aria-live="polite"></div>
+      </section>
+        <ul class="chips" id="chips"></ul>
+        <p class="fine">Nearest Pantone® TCX match to each of my colors. Matches are approximate.</p>
+      </section>
+
+      <section class="music" aria-label="Music">
+        <h2 class="syn">music</h2>
+        <p class="try">Pick a song, see its color</p>
+        <!-- To add a song: copy one <li>. data-glow is its glow: a color like #f2506e, or a gradient like radial-gradient(ellipse closest-side, #ff2fd0 0%, #7a2bd6 100%). data-color is one color that stands for it. -->
+        <ul class="results" id="songResults">
+          <li><button type="button" data-title="A Case of You" data-artist="Joni Mitchell" data-color="#0a1a5c" data-glow="radial-gradient(ellipse closest-side, #b8f5d6 0%, #7fe3b4 14%, #2fa58c 28%, #0a1a5c 46%, #0a1a5c 100%)" data-q="a case of you" data-match="a case of you"><i class="dot" aria-hidden="true"></i><span><span class="t">A Case of You</span><small>Joni Mitchell</small></span></button></li>
+          <li><button type="button" data-title="Shot at the Night" data-artist="The Killers" data-color="#ff9a2e" data-glow="radial-gradient(ellipse closest-side, #ff3b3b 0%, #ff9a2e 9%, #ffe03a 18%, #4cd964 27%, #2fc4ff 36%, #8a5cff 45%, #ff4fd8 54%, #ff4fd8 100%)" data-q="shot at the night the killers" data-match="shot at the night"><i class="dot" aria-hidden="true"></i><span><span class="t">Shot at the Night</span><small>The Killers</small></span></button></li>
+          <li><button type="button" data-title="Dreams" data-artist="The Cranberries" data-color="#c23bff" data-glow="radial-gradient(ellipse closest-side, #ff2fd0 0%, #c23bff 24%, #7a2bd6 46%, #7a2bd6 100%)" data-q="dreams the cranberries" data-match="dreams"><i class="dot" aria-hidden="true"></i><span><span class="t">Dreams</span><small>The Cranberries</small></span></button></li>
+          <li><button type="button" data-title="Take Me Home, Country Roads" data-artist="John Denver" data-color="#1f4d2b" data-glow="radial-gradient(ellipse closest-side, #efe3c4 0%, #d9cca6 13%, #6b8a52 28%, #1f4d2b 44%, #1f4d2b 100%)" data-q="take me home country roads john denver" data-match="country roads"><i class="dot" aria-hidden="true"></i><span><span class="t">Take Me Home, Country Roads</span><small>John Denver</small></span></button></li>
+          <li><button type="button" data-title="Champagne Supernova" data-artist="Oasis" data-color="#ff7a1a" data-glow="radial-gradient(ellipse closest-side, #ffe14d 0%, #ffb300 11%, #ff7a1a 22%, #ff4e2a 34%, #ff4e2a 100%)" data-q="champagne supernova oasis" data-match="champagne supernova"><i class="dot" aria-hidden="true"></i><span><span class="t">Champagne Supernova</span><small>Oasis</small></span></button></li>
+        </ul>
+        <p class="status" id="songStatus" role="status" aria-live="polite"></p>
+        <div class="now" id="now" hidden>
+          <img id="nowArt" alt="" width="72" height="72">
+          <div class="meta"><strong id="nowTitle"></strong><span id="nowArtist"></span></div>
+          <button type="button" id="nowToggle">pause</button>
+        </div>
+      </section>
+    </div>
+  </details>
+
+  <details class="panel" id="work">
+    <summary class="syn"><span class="t-closed">work</span><span class="t-open">Brands I’ve worked with</span></summary>
+    <div class="body wide">
+      <ul class="brands" id="brands">
+        <li data-name="Apple"><img src="logos/apple.svg" alt="Apple"></li>
+        <li data-name="News Corp"><img src="logos/news-corp.svg" alt="News Corp"></li>
+        <li data-name="National Geographic"><img src="logos/national-geographic.svg" alt="National Geographic"></li>
+        <li data-name="GE"><img src="logos/ge.svg" alt="GE"></li>
+      </ul>
+      <section class="awards" aria-label="Awards">
+        <h3 class="syn">Awards</h3>
+        <ul class="brands" id="awards">
+          <li data-name="Cannes Lions"><img src="logos/cannes-lions.svg" alt="Cannes Lions"></li>
+        </ul>
+        <p class="award-copy">2018 Brand Experience &amp; Activation Grand Prix<br>2026 In-House Agency of the Year</p>
+      </section>
+    </div>
+  </details>
+
+  <details class="panel contact" id="contact">
+    <summary class="syn">contact</summary>
+    <div class="body">
+      <p>Drop me a line or let’s chat over a coffee?</p>
+      <p><a class="book" href="mailto:amcginty85@gmail.com?subject=Let%E2%80%99s%20find%20time">Let’s find time</a></p>
+      <div class="social inline">
+<a href="https://www.linkedin.com/in/amy-mcginty-poso" aria-label="LinkedIn" data-letter="N" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>
+    <a href="https://www.instagram.com/curlydays/" aria-label="Instagram" data-letter="I" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.64-.07-4.85s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.69.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.2-4.35-2.62-6.78-6.98-6.98C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/></svg></a>
+      </div>
+    </div>
+  </details>
+</main>
+
+<footer>
+  <span>&copy; <span id="yr"></span> Amy McGinty<small class="made">** Built with AI by a HUMAN who knows what she’s doing.</small></span>
+  <a class="up" href="#top" aria-label="Back to top"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 15l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+</footer>
+</div>
+
+<div class="eyes" role="group" aria-label="Whose eyes">
+  <button type="button" id="eyesMine" aria-pressed="true">My eyes</button>
+  <button type="button" id="eyesYours" aria-pressed="false">Your eyes</button>
+</div>
+<script>
+/* ===== Letter and number colors. Edit any value to tune it. ===== */
+/* How long a hover color stays before fading back (milliseconds) */
+const HOLD_MS = 5000;
+
+const COLORS = {
+  A:"#2f6bff", B:"#ff7eb6", C:"#ffd93b", D:"#7b4a2a", E:"#8a4fd6", F:"#d9b99b",
+  G:"#5a3519", H:"#9b6b43", I:"#bfe9ff", J:"#a9a1ff", K:"#f2506e", L:"#ffffff",
+  M:"#e5202a", N:"#ff8a1f", O:"#ffc500", P:"#4a2a14", Q:"#bdb88a", R:"#1f6b3a",
+  S:"#ff5a2a", T:"#19a58a", U:"#e8b17a", V:"#f5c3a5", W:"#b284a0", X:"#ffb866",
+  Y:"#ffc0d3", Z:"#d4a017",
+  0:"#ffffff", 1:"#2a3cff", 2:"#e0242a", 3:"#5fc233", 4:"#5b3cc4",
+  5:"#f2a121", 6:"#ff2fa0", 7:"#8e3fd0", 8:"#c04fc0", 9:"#8c1d3f"
+};
+
+/* Wrap each character of all site copy so it can be colored.
+   New content: add its selector to COPY, or give any element the class "syn". */
+const COPY = ".syn, nav a, .body, footer";
+function wrapSyn(root) {
+  root.querySelectorAll(COPY).forEach(el => {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(n => {
+      if (!n.nodeValue.trim() || n.parentElement.closest(".w")) return;
+      const frag = document.createDocumentFragment();
+      n.nodeValue.split(/(\s+)/).forEach(chunk => {
+        if (chunk === "") return;
+        if (/^\s+$/.test(chunk)) { frag.append(" "); return; }
+        const w = document.createElement("span");
+        w.className = "w";
+        [...chunk].forEach((ch, i) => {
+          const s = document.createElement("span");
+          s.className = "l"; s.textContent = ch;
+          if (COLORS[ch.toUpperCase()]) s.dataset.c = COLORS[ch.toUpperCase()];
+          s.style.transitionDelay = "0s, " + (i * 45) + "ms";
+          w.append(s);
+        });
+        frag.append(w);
+      });
+      n.replaceWith(frag);
+    });
+  });
+}
+document.getElementById("yr").textContent = new Date().getFullYear();
+wrapSyn(document);
+
+/* Hover (mouse) and drag/tap (touch) coloring */
+/* Opposite-color backdrop helpers (shared by every hover) */
+const DEEP = 0.4;                           /* page tint strength: 1 = full color, lower = deeper */
+const rgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+const deep = (h, k = DEEP) => "rgb(" + rgb(h).map(v => Math.round(v * k)).join(",") + ")";
+const hsl = h => {
+  const [r, g, b] = rgb(h).map(v => v / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  let hue = 0;
+  if (d) hue = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  const l = (mx + mn) / 2;
+  return { h: (hue * 60 + 360) % 360, s: d ? d / (1 - Math.abs(2 * l - 1)) : 0 };
+};
+const luma = c => { const [r, g, b] = rgb(c); return .299 * r + .587 * g + .114 * b; };
+const lib = Object.values(COLORS).map(c => ({ c, ...hsl(c) })).filter(o => o.s > .35);
+function compHex(hex) {                     /* the library color opposite this hue */
+  const { h, s } = hsl(hex);
+  if (s < .15) return lib[Math.floor(Math.random() * lib.length)].c;   /* whites and beiges: any color */
+  const want = (h + 180) % 360, gap = x => Math.min(Math.abs(x - want), 360 - Math.abs(x - want));
+  return lib.reduce((a, b) => gap(b.h) < gap(a.h) ? b : a).c;
+}
+
+/* The page rests on --bg, tints toward whatever you touch, then drifts home */
+const page = document.documentElement;
+let bgTimer;
+function tintPage(color) {
+  if (page.classList.contains("plain")) return;
+  clearTimeout(bgTimer);
+  page.style.transition = "background-color 1.2s ease";
+  page.style.backgroundColor = color;
+  page.style.setProperty("--bar", color);
+  page.style.setProperty("--a-color", COLORS.A);
+  bgTimer = setTimeout(() => { page.style.transition = "background-color 2s ease"; page.style.backgroundColor = ""; page.style.removeProperty("--bar"); page.style.removeProperty("--a-color"); }, HOLD_MS);
+}
+
+/* A soft bloom of color behind a letter, in a layer that sits behind all the text */
+const aura = document.getElementById("aura"), orbs = new WeakMap();
+function bloom(el, hex) {
+  if (page.classList.contains("plain")) return;
+  const r = el.getBoundingClientRect(), size = Math.max(el.offsetHeight * 2.6, 64);
+  let o = orbs.get(el);
+  if (!o) { o = document.createElement("div"); o.className = "orb"; aura.append(o); orbs.set(el, o); }
+  clearTimeout(o._t);
+  Object.assign(o.style, {
+    left: (r.left + scrollX + r.width / 2 - size / 2) + "px", top: (r.top + scrollY + r.height / 2 - size / 2) + "px",
+    width: size + "px", height: size + "px", background: "radial-gradient(circle, " + hex + " 0%, " + hex + "00 68%)",
+    transition: "opacity .3s ease", opacity: ".9"
+  });
+  o._t = setTimeout(() => {
+    o.style.transition = "opacity 1.6s ease"; o.style.opacity = "0";
+    o._t = setTimeout(() => { o.remove(); orbs.delete(el); }, 1700);
+  }, HOLD_MS);
+}
+
+/* "A" is the same blue as the resting page, so it follows --a-color: navy on the blue page, its own blue when the page has tinted */
+const shown = (hex) => hex === COLORS.A ? "var(--a-color)" : hex;
+const timers = new WeakMap();
+function paint(el) {
+  if (!el || !el.dataset || !el.dataset.c || page.classList.contains("plain")) return;
+  clearTimeout(timers.get(el));
+  el.style.transition = "color .12s, font-weight 1.4s ease";
+  el.style.color = shown(el.dataset.c);
+  if (!el.closest(".logo")) {                 /* the name has its own glow */
+    const opp = compHex(el.dataset.c);
+    bloom(el, opp);
+    if (!(el.dataset.c === COLORS.A && page.style.backgroundColor === "")) tintPage(deep(opp));   /* hovering A on the blue page keeps the page blue so A can show white */
+  }
+  timers.set(el, setTimeout(() => { el.style.transition = ""; el.style.color = ""; }, HOLD_MS));
+}
+/* typed-word letters keep their color; hovering only adds the bloom and the page tint */
+function glow(el) {
+  if (page.classList.contains("plain")) return;
+  const opp = compHex(el.dataset.c);
+  bloom(el, opp);
+  if (!(el.dataset.c === COLORS.A && page.style.backgroundColor === "")) tintPage(deep(opp));
+}
+function hit(e) {
+  const t = document.elementFromPoint(e.clientX, e.clientY);
+  if (!t || !t.classList) return;
+  if (t.classList.contains("l")) paint(t);
+  else if (t.classList.contains("ol")) glow(t);
+}
+document.addEventListener("pointermove", hit);
+document.addEventListener("pointerdown", hit);
+
+/* My alphabet: every letter and number in its color, plus a "type a word" tool */
+const ORDER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+function paintWord(text, target, hover) {
+  target.textContent = "";
+  [...text].forEach(ch => {
+    const sp = document.createElement("span");
+    sp.textContent = ch === " " ? "\u00A0" : ch;
+    sp.style.color = shown(COLORS[ch.toUpperCase()]) || "#fff";
+    if (hover && COLORS[ch.toUpperCase()]) { sp.className = "ol"; sp.dataset.c = COLORS[ch.toUpperCase()]; }   /* letters of the typed word get the same hover glow as the rest of the site */
+    target.append(sp);
+  });
+}
+if (document.getElementById("abc")) {   /* home page only */
+  paintWord(ORDER, document.getElementById("abc"));
+  const wordIn = document.getElementById("word"), wordOut = document.getElementById("out");
+  /* empty box: show the placeholder word in color below it */
+  const showWord = () => paintWord(wordIn.value || wordIn.placeholder, wordOut, true);
+  wordIn.addEventListener("input", showWord);
+  showWord();
+}
+
+/* My swatches: every letter and number as a paint chip. The block is my color (from the same COLORS list as the
+   rest of the site); the label gives the nearest Pantone TCX color. Edit a code or name in PANTONE below. */
+(function swatches() {
+  const list = document.getElementById("chips");
+  if (!list) return;
+  const PANTONE = {
+    0:["11-0601","Bright White"],
+    1:["19-3955","Royal Blue"],
+    2:["18-1664","Fiery Red"],
+    3:["15-0545","Jasmine Green"],
+    4:["19-3850","Liberty"],
+    5:["14-0955","Citrus"],
+    6:["18-2436","Fuchsia Purple"],
+    7:["19-3642","Royal Purple"],
+    8:["17-2624","Rose Violet"],
+    9:["19-1850","Red Bud"],
+    A:["18-3949","Dazzling Blue"],
+    B:["16-2122","Pink Cosmos"],
+    C:["13-0758","Dandelion"],
+    D:["18-1048","Monks Robe"],
+    E:["19-3748","Prism Violet"],
+    F:["13-1015","Honey Peach"],
+    G:["19-1227","Sorrel Horse"],
+    H:["17-1134","Brown Sugar"],
+    I:["13-4401","Quiet Tide"],
+    J:["16-3823","Violet Tulip"],
+    K:["18-1755","Rouge Red"],
+    L:["11-0601","Bright White"],
+    M:["18-1664","Fiery Red"],
+    N:["15-1262","Carrot Curl"],
+    O:["13-0859","Lemon Chrome"],
+    P:["19-1218","Potting Soil"],
+    Q:["15-0523","Winter Pear"],
+    R:["18-6026","Abundant Green"],
+    S:["17-1361","Scarlet Ibis"],
+    T:["16-5431","Peacock Green"],
+    U:["13-1027","Apricot Cream"],
+    V:["12-0917","Bleached Apricot"],
+    W:["16-2111","Mauve Orchid"],
+    X:["14-1051","Warm Apricot"],
+    Y:["13-2010","Orchid Pink"],
+    Z:["15-0954","Symphonic Sunset"]
+  };
+  const MINE = {
+    A:"Blue", B:"Pink", C:"Yellow", D:"Brown", E:"Purple", F:"Fawn / beige", G:"Dark brown", H:"Lighter brown",
+    I:"Ice blue", J:"Lilac", K:"Reddish pink", L:"White", M:"Red", N:"Orange", O:"Sun yellow", P:"Dark brown",
+    Q:"Greeny beige", R:"Forest green", S:"Reddish orange", T:"Teal green", U:"Beigeish orange", V:"Light pinkish beige",
+    W:"Mauve", X:"Light orange", Y:"Light pink", Z:"Mustard",
+    0:"White", 1:"Black or blue", 2:"Red", 3:"Kermit green", 4:"Indigo", 5:"Sunburnt orange", 6:"Barbie pink", 7:"Purple", 8:"Pinky purple", 9:"Burgundy"
+  };
+  const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt) e.textContent = txt; return e; };
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("").forEach(ch => {
+    const [code, name] = PANTONE[ch];
+    const li = el("li", "chip"), block = el("span", "block"), label = el("span", "label");
+    li.style.setProperty("--chip", COLORS[ch]);
+    li.style.setProperty("--on", luma(COLORS[ch]) > 150 ? "#111" : "#fff");   /* letter stays readable on light and dark chips */
+    li.title = ch + ": " + MINE[ch];
+    block.append(el("span", "ch", ch));
+    label.append(el("span", "pt", "PANTONE®"), el("span", "code", code + " TCX"), el("span", "nm", name));
+    li.append(block, label); list.append(li);
+  });
+})();
+
+/* Hero phrases: play once, 3-6 seconds apart, and rest on the last one.
+   Edit PHRASES to change the words. To loop forever, change the "if (i >= ...)" line to wrap i back to 0. */
+(function heroPhrases() {
+  const hero = document.querySelector(".hero"), h1 = document.querySelector(".hero h1");
+  if (!h1) return;
+  const PHRASES = ["Amy McGinty", "G’Day", "I’m so glad you’re here", "Let me show you how I see the world"];
+  let i = 0, timers = [];
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+  const wait = () => 3000 + Math.random() * 3000;
+  function show(n) {
+    i = n;
+    h1.textContent = PHRASES[i];
+    h1.classList.toggle("long", PHRASES[i].length > 20);   /* longer lines get a smaller size */
+    wrapSyn(hero);
+    h1.style.opacity = "1";
+  }
+  function next() {
+    if (i >= PHRASES.length - 1) return;
+    h1.style.opacity = "0";                                  /* fade out, swap, fade in */
+    later(() => { show(i + 1); later(next, wait()); }, 600);
+  }
+  const stop = () => { timers.forEach(clearTimeout); timers = []; };
+  /* Your eyes: just "Amy McGinty", no phrases. My eyes: the sequence plays again from the start. */
+  document.addEventListener("eyes-plain", () => { stop(); show(0); });
+  document.addEventListener("eyes-mine", () => { stop(); show(0); later(next, wait()); });
+  later(next, wait());
+})();
+
+/* Hero interactivity (letters keep their size and shape; only color changes):
+   1) click or tap sends a ripple of each letter's own color outward
+   2) typing a letter or number lights every matching letter in the headline */
+(function heroPlay() {
+  const hint = document.getElementById("hint");
+  const hero = document.querySelector(".hero");
+  if (!hero) return;                                   /* home page only */
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { hint.hidden = true; return; }
+  const letters = () => [...document.querySelectorAll(".hero h1 .l")];   /* re-read each time: the phrase changes */
+  const center = el => {
+    const r = el.getBoundingClientRect();
+    return [r.left + r.width / 2, r.top + r.height / 2];
+  };
+
+  hero.addEventListener("pointerdown", e => {          /* ripple outward from the touch point */
+    if (e.target.closest("a")) return;
+    letters().forEach(el => {
+      const [cx, cy] = center(el);
+      setTimeout(() => paint(el), Math.hypot(e.clientX - cx, e.clientY - cy) * .9);
+    });
+  });
+
+  document.addEventListener("keydown", e => {          /* type to light up matching letters */
+    if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest("input, textarea")) return;
+    if (hero.getBoundingClientRect().bottom < 0) return;
+    const k = e.key.length === 1 ? e.key.toUpperCase() : "";
+    if (!COLORS[k]) return;
+    letters().filter(el => el.dataset.c && el.textContent.toUpperCase() === k).forEach(el => paint(el));
+  });
+})();
+
+/* Music: a short list of my songs. Each has its own color (set in the list's data-color), so a song always
+   glows the same color. Tap one to play a 30-second preview (looked up from Apple's free iTunes Search API,
+   no key needed) while a soft bloom in that color sits behind the player. */
+(function music() {
+  const list = document.getElementById("songResults");
+  if (!list) return;
+  const status = document.getElementById("songStatus"), now = document.getElementById("now"),
+        art = document.getElementById("nowArt"), title = document.getElementById("nowTitle"),
+        artist = document.getElementById("nowArtist"), toggle = document.getElementById("nowToggle");
+  const audio = new Audio();
+  audio.preload = "none";
+  document.addEventListener("eyes-plain", () => audio.pause());   /* switching to Your eyes stops any song */
+  const say = msg => { status.textContent = msg; };
+  const buttons = [...list.querySelectorAll("button")];
+  buttons.forEach(b => { b.style.setProperty("--c", b.dataset.color); b.style.setProperty("--dot", b.dataset.glow || b.dataset.color); });
+
+  /* find each song's preview (fetched once, then kept) */
+  const found = new Map();
+  function lookup(b) {
+    if (found.has(b)) return found.get(b);
+    const want = (b.dataset.match || b.dataset.title).toLowerCase();
+    const who = b.dataset.artist.toLowerCase().replace(/^the /, "").split(" ")[0];
+    const p = fetch("https://itunes.apple.com/search?media=music&entity=song&limit=10&term=" + encodeURIComponent(b.dataset.q))
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(d => {
+        const hits = (d.results || []).filter(t => t.previewUrl);
+        return hits.find(t => t.trackName.toLowerCase().includes(want) && t.artistName.toLowerCase().includes(who)) || hits[0] || null;
+      })
+      .catch(() => { found.delete(b); throw new Error("net"); });
+    found.set(b, p);
+    return p;
+  }
+  const prefetch = () => buttons.forEach(b => lookup(b).catch(() => {}));   /* so a tap can play instantly */
+  const about = document.getElementById("about");
+  if (about) { about.addEventListener("toggle", () => { if (about.open) prefetch(); }); if (about.open) prefetch(); }
+
+  let current = null;
+  async function choose(b) {
+    current = b;
+    buttons.forEach(x => x.classList.toggle("active", x === b));
+    now.classList.add("swap");                              /* fade the old glow out, then bring in this song's own */
+    setTimeout(() => {
+      if (current !== b) return;
+      now.style.setProperty("--song", b.dataset.color);
+      now.style.setProperty("--song-bg", b.dataset.glow || b.dataset.color);   /* this song's glow, every time */
+      now.classList.remove("swap");
+    }, now.hidden ? 0 : 280);
+    title.textContent = b.dataset.title; artist.textContent = b.dataset.artist;
+    art.removeAttribute("src"); now.hidden = false;
+    audio.pause(); say("finding the song…");
+    try {
+      const t = await lookup(b);
+      if (current !== b) return;                              /* they tapped another song meanwhile */
+      if (!t) { say("no preview available for this one"); return; }
+      say("");
+      art.src = (t.artworkUrl100 || "").replace("100x100", "200x200");
+      audio.src = t.previewUrl;
+      audio.play().catch(() => say("tap play to start the preview"));
+    } catch (e) {
+      if (current === b) say("couldn’t reach the music service, check your connection and tap the song again");
+    }
+  }
+  buttons.forEach(b => b.addEventListener("click", () => choose(b)));
+
+  audio.addEventListener("play", () => { now.classList.add("playing"); toggle.textContent = "pause"; });
+  audio.addEventListener("pause", () => { now.classList.remove("playing"); toggle.textContent = "play"; });
+  audio.addEventListener("ended", () => { now.classList.remove("playing"); toggle.textContent = "play again"; });
+  toggle.addEventListener("click", () => {
+    if (!audio.src) { if (current) choose(current); return; }
+    if (audio.paused) { if (audio.ended) audio.currentTime = 0; audio.play(); } else audio.pause();
+  });
+})();
+
+/* Name: pinned at the top left on a full-width bar that follows you down the page, but hidden while the hero is on screen */
+(function pinName() {
+  const logo = document.querySelector(".logo"), hero = document.querySelector(".hero"), bar = document.querySelector(".namebar");
+  if (!logo || !hero) return;
+  const check = () => { const on = hero.getBoundingClientRect().bottom < 120; logo.classList.toggle("show", on); bar.classList.toggle("show", on); };
+  window.addEventListener("scroll", check, { passive: true });
+  window.addEventListener("resize", check);
+  check();
+})();
+
+/* Nav: open the matching accordion panel, then scroll to it */
+function openPanel(id, push) {
+  const p = document.getElementById(id);
+  if (!p || p.tagName !== "DETAILS") return false;
+  p.open = true;
+  p.scrollIntoView({ behavior: "auto", block: "start" });
+  if (push) history.pushState(null, "", "#" + id);
+  return true;
+}
+document.querySelectorAll('nav a[href^="#"]').forEach(a =>
+  a.addEventListener("click", e => { if (openPanel(a.getAttribute("href").slice(1), true)) e.preventDefault(); }));
+if (location.hash) openPanel(location.hash.slice(1), false);
+
+
+/* brand logos: if a logo file is missing, show the brand name instead */
+(function brandLogos(){
+  document.querySelectorAll("#brands, #awards").forEach(list=>{
+  const fallback=img=>{const li=img.parentNode; if(li.querySelector(".nm")) return;
+    const sp=document.createElement("span"); sp.className="nm syn"; sp.textContent=li.dataset.name;
+    img.replaceWith(sp); wrapSyn(sp);};
+  list.querySelectorAll("img").forEach(img=>{
+    img.addEventListener("error",()=>fallback(img));
+    if(img.complete && !img.naturalWidth) fallback(img);
+  });
+  });
+})();
+
+/* My eyes / Your eyes toggle */
+(function eyes() {
+  const mine = document.getElementById("eyesMine"), yours = document.getElementById("eyesYours");
+  if (!mine || !yours) return;
+  const set = (plain, save) => {
+    if (plain) {                                   /* drop any tint or glow that is mid-fade */
+      clearTimeout(bgTimer);
+      page.style.backgroundColor = ""; page.style.removeProperty("--bar"); page.style.removeProperty("--a-color");
+      document.querySelectorAll("#aura .orb").forEach(o => o.remove());
+    }
+    page.classList.toggle("plain", plain);
+    document.dispatchEvent(new Event(plain ? "eyes-plain" : "eyes-mine"));
+    mine.setAttribute("aria-pressed", String(!plain)); yours.setAttribute("aria-pressed", String(plain));
+    if (save) { try { localStorage.setItem("eyes", plain ? "yours" : "mine"); } catch (e) {} }
+  };
+  mine.addEventListener("click", () => set(false, true));
+  yours.addEventListener("click", () => set(true, true));
+  try { if (localStorage.getItem("eyes") === "yours") set(true, false); } catch (e) {}
+})();
+
+/* Social icons: hover takes a letter's color (set data-letter on the link to change it), with the same glow and page tint as the copy */
+(function socialColor() {
+  document.querySelectorAll(".social a[data-letter]").forEach(a => {
+    a.dataset.c = COLORS[a.dataset.letter.toUpperCase()];
+    const go = () => {
+      if (page.classList.contains("plain")) return;
+      clearTimeout(a._t);
+      a.style.color = shown(a.dataset.c);
+      glow(a);
+      a._t = setTimeout(() => { a.style.color = ""; }, HOLD_MS);
+    };
+    a.addEventListener("pointerenter", go);
+    a.addEventListener("focus", go);
+  });
+})();
+
+/* Knockout label on the selected eyes button: a mask with the text cut out, drawn on a canvas with the page's own font */
+(function eyesKnockout() {
+  const btns = [document.getElementById("eyesMine"), document.getElementById("eyesYours")];
+  if (!btns[0] || !btns[1]) return;
+  const build = b => {
+    const r = b.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 3);
+    if (!r.width) return;
+    try {
+      const c = document.createElement("canvas"); c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+      const x = c.getContext("2d"), cs = getComputedStyle(b);
+      x.scale(dpr, dpr); x.fillStyle = "#000"; x.fillRect(0, 0, r.width, r.height);
+      x.globalCompositeOperation = "destination-out";
+      x.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`; x.textAlign = "center"; x.textBaseline = "alphabetic";
+      const m = x.measureText(b.textContent), asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
+      x.fillText(b.textContent, r.width / 2, r.height / 2 + (asc - desc) / 2 + .5 * 0);
+      const url = `url(${c.toDataURL()})`;
+      b.style.webkitMaskImage = url; b.style.maskImage = url; b.classList.add("ko");
+    } catch (e) { b.classList.remove("ko"); }
+  };
+  const clear = b => { b.classList.remove("ko"); b.style.webkitMaskImage = ""; b.style.maskImage = ""; };
+  const update = () => btns.forEach(b => b.getAttribute("aria-pressed") === "true" ? build(b) : clear(b));
+  btns.forEach(b => b.addEventListener("click", () => setTimeout(update, 0)));
+  addEventListener("resize", update);
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(update);
+  update();
+})();
+</script>
+</body>
+</html>
