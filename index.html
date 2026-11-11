@@ -3,13 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>How I see the world</title>
+<title>Amy McGinty</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Major+Mono+Display&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --a-color: #08155a;   /* what the letter A shows: deep navy on the resting blue (so it stands apart), its own blue once the page tints */
     --bg: #2f6bff; /* resting page color: the blue of A (keep in sync with COLORS.A) */
     --fg: #fff;
     --muted: rgba(255,255,255,.94);
@@ -79,7 +78,7 @@
   .awards h3 { flex: 0 0 100%; margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(1.2rem, 2.8vw, 1.8rem); line-height: 1.2; color: var(--fg); }
   .awards .brands { display: block; margin: 0; width: auto; }
   .awards .brands li { width: auto; min-height: 0; }
-  .awards .brands img { max-height: 64px; }
+  .awards .brands img { height: 64px; }
   .awards .award-copy { margin: 0; font-family: var(--sans); font-size: 1rem; line-height: 1.55; max-width: 52ch; }
   .alphabet h2, .music h2, .swatches h2 { font-size: clamp(1.4rem, 4vw, 2.6rem); font-weight: 400; line-height: 1.1; margin: 0 0 1.5rem; }
   .abc { display: flex; flex-wrap: wrap; gap: .1rem .7rem; font-size: clamp(1.5rem, 5vw, 2.6rem); line-height: 1.25; }
@@ -107,7 +106,7 @@
   .try, footer { font-size: .95rem; }
   .brands { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 3rem 2rem; align-items: center; justify-items: center; }
   .brands li { display: flex; align-items: center; justify-content: center; min-height: 64px; width: 100%; }
-  .brands img { max-width: 100%; max-height: 56px; width: auto; height: auto; filter: brightness(0) invert(1); opacity: .92; }
+  .brands img { max-width: 100%; height: 56px; width: auto; filter: brightness(0) invert(1); opacity: .92; }
   .brands .nm { font-family: var(--serif); font-size: clamp(1.1rem, 2.4vw, 1.5rem); text-align: center; }
   .social.inline { position: static; justify-content: flex-start; gap: 1rem; margin-top: 1.5rem; }
   .social.inline a:first-child { margin-left: -10px; }
@@ -123,7 +122,8 @@
   .eyes button.ko { color: #fff; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
   .eyes button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   html { transition: background-color .8s ease; }
-  html.plain { --bg: #161616; --a-color: #fff; }
+  html.plain { --bg: #161616; }
+  #out span, #abc span { transition: color 1.5s ease; }   /* a letter easing to white when the background drifts toward its color */
   .plain .l, .plain #abc span, .plain #out span { color: #fff !important; }
   .plain #aura { display: none; }
   .plain .hero .hint, .plain .alphabet, .plain .swatches, .plain .music { display: none; }   /* no perception content in Your eyes: no prompt, alphabet, palette or music */
@@ -204,11 +204,10 @@
   <details class="panel" id="about">
     <summary class="syn">About me</summary>
     <div class="body">
-      <p>Building brands people feel long before they see a logo. Fifteen years in, I still love to create. My work goes beyond shaping brand identities and systems into storytelling, capturing the human experience at the intersection of art and technology.</p>
-      <p>I see the world in color. Letters, numbers, countries and music all arrive for me already tinted, and they always have. Every name has a hue and every year has a mood. It’s how I’ve experienced life for as long as I can remember, and it shapes everything I make.</p>
-      <p>I’m an art director with ten years as a senior creative at one of the world’s leading technology companies. My work sits where people, design and technology meet. I care about the details most people never notice, because that’s usually where a brand either feels right or doesn’t. I’m serious about craft and I take the work seriously, and I’ve never lost the sense of wonder that got me into this in the first place.</p>
-      <p>Color isn’t decoration for me, it’s information. It’s how I read a room, build an identity and tell when something is finished. I’m now looking for the next step up, leading bigger ideas and the teams who bring them to life.</p>
-      <p>If you’d like to see the world the way I do, start with the letters at the top of this page.</p>
+      <p>Building brands people feel long before they see a logo. Fifteen years in, I still love what I do. My work goes beyond shaping identities and systems, deep into storytelling, capturing the human experience.</p>
+      <p>I see the world in color. Letters, numbers, countries, and music all arrive for me already tinted. Color isn’t decoration for me; it’s information. It’s how I read a room, design, and tell when something is finished.</p>
+      <p>I’m an art director with ten years as a senior creative at one of the world’s leading technology companies.<br>I care about the details most people never notice because that’s usually where a brand either feels right or doesn’t.</p>
+      <p>I’m looking for the next step up, leading bigger ideas and the teams who bring them to life.</p>
 
       <section class="swatches" aria-label="My alphabet as color swatches">
         <h2 class="syn">perception palette</h2>
@@ -356,15 +355,45 @@ function compHex(hex) {                     /* the library color opposite this h
 /* The page rests on --bg, tints toward whatever you touch, then drifts home */
 const page = document.documentElement;
 let bgTimer;
+/* Background: it drifts on its own through colors from the palette (the "ambient" color); touching a letter tints it
+   toward that letter's opposite for HOLD_MS, then it eases back to wherever the drift is. */
+let ambient = "", holding = false, lastAmb = "", ambTimer;
+const curBg = () => getComputedStyle(page).backgroundColor;
+const targetBg = () => holding ? page.style.backgroundColor : (ambient || "rgb(47,107,255)");
+function setBg(color, ms) {
+  page.style.transition = "background-color " + ms + "ms ease";
+  page.style.backgroundColor = color;
+  if (color) page.style.setProperty("--bar", color); else page.style.removeProperty("--bar");
+}
 function tintPage(color) {
   if (page.classList.contains("plain")) return;
   clearTimeout(bgTimer);
-  page.style.transition = "background-color 1.2s ease";
-  page.style.backgroundColor = color;
-  page.style.setProperty("--bar", color);
-  page.style.setProperty("--a-color", COLORS.A);
-  bgTimer = setTimeout(() => { page.style.transition = "background-color 2s ease"; page.style.backgroundColor = ""; page.style.removeProperty("--bar"); page.style.removeProperty("--a-color"); }, HOLD_MS);
+  holding = true;
+  setBg(color, 1200);
+  fixWord();
+  bgTimer = setTimeout(() => { holding = false; setBg(ambient, 2000); fixWord(); }, HOLD_MS);
 }
+const AMB = lib.filter(o => o.s > .6 && luma(o.c) > 70);   /* the vivid colors of the palette (no browns or beiges) */
+const jewel = h => {                                       /* that hue as a rich, deep tone so white copy stays readable */
+  const s = .62, l = .3, c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return "rgb(" + [r, g, b].map(v => Math.round((v + m) * 255)).join(",") + ")";
+};
+function ambientTick() {
+  if (page.classList.contains("plain")) return;
+  let o; do { o = AMB[Math.floor(Math.random() * AMB.length)]; } while (o.c === lastAmb && AMB.length > 1);
+  lastAmb = o.c; ambient = jewel(o.h);
+  if (!holding) setBg(ambient, 4000);
+  fixWord();
+}
+function startAmbient() {
+  clearInterval(ambTimer);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  setTimeout(ambientTick, 2500);
+  ambTimer = setInterval(ambientTick, 8000);
+}
+document.addEventListener("eyes-plain", () => { clearInterval(ambTimer); ambient = ""; holding = false; clearTimeout(bgTimer); });
+document.addEventListener("eyes-mine", startAmbient);
 
 /* A soft bloom of color behind a letter, in a layer that sits behind all the text */
 const aura = document.getElementById("aura"), orbs = new WeakMap();
@@ -385,18 +414,25 @@ function bloom(el, hex) {
   }, HOLD_MS);
 }
 
-/* "A" is the same blue as the resting page, so it follows --a-color: navy on the blue page, its own blue when the page has tinted */
-const shown = (hex) => hex === COLORS.A ? "var(--a-color)" : hex;
+/* A letter shows its own color, unless that would blend into the background: then it shows white so it never disappears */
+const lumOf = ([r, g, b]) => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+const contrast = (a, b) => { const x = lumOf(a), y = lumOf(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+const shown = (hex, bg) => contrast(rgb(hex), (String(bg || curBg()).match(/[\d.]+/g) || [47, 107, 255]).slice(0, 3).map(Number)) < 2.2 ? "#fff" : hex;
+/* the typed word and the alphabet row re-check their letters whenever the background changes */
+function fixWord() {
+  const bg = targetBg();
+  document.querySelectorAll("[data-wc]").forEach(el => { el.style.color = shown(el.dataset.wc, bg); });
+}
 const timers = new WeakMap();
 function paint(el) {
   if (!el || !el.dataset || !el.dataset.c || page.classList.contains("plain")) return;
   clearTimeout(timers.get(el));
   el.style.transition = "color .12s, font-weight 1.4s ease";
-  el.style.color = shown(el.dataset.c);
-  if (!el.closest(".logo")) {                 /* the name has its own glow */
-    const opp = compHex(el.dataset.c);
+  const logo = el.closest(".logo"), opp = compHex(el.dataset.c), next = logo ? curBg() : deep(opp);
+  el.style.color = shown(el.dataset.c, next);
+  if (!logo) {                                /* the name has its own glow */
     bloom(el, opp);
-    if (!(el.dataset.c === COLORS.A && page.style.backgroundColor === "")) tintPage(deep(opp));   /* hovering A on the blue page keeps the page blue so A can show white */
+    tintPage(next);
   }
   timers.set(el, setTimeout(() => { el.style.transition = ""; el.style.color = ""; }, HOLD_MS));
 }
@@ -405,7 +441,7 @@ function glow(el) {
   if (page.classList.contains("plain")) return;
   const opp = compHex(el.dataset.c);
   bloom(el, opp);
-  if (!(el.dataset.c === COLORS.A && page.style.backgroundColor === "")) tintPage(deep(opp));
+  tintPage(deep(opp));
 }
 function hit(e) {
   const t = document.elementFromPoint(e.clientX, e.clientY);
@@ -423,8 +459,10 @@ function paintWord(text, target, hover) {
   [...text].forEach(ch => {
     const sp = document.createElement("span");
     sp.textContent = ch === " " ? "\u00A0" : ch;
-    sp.style.color = shown(COLORS[ch.toUpperCase()]) || "#fff";
-    if (hover && COLORS[ch.toUpperCase()]) { sp.className = "ol"; sp.dataset.c = COLORS[ch.toUpperCase()]; }   /* letters of the typed word get the same hover glow as the rest of the site */
+    const c = COLORS[ch.toUpperCase()];
+    sp.style.color = c ? shown(c, targetBg()) : "#fff";
+    if (c) sp.dataset.wc = c;
+    if (hover && c) { sp.className = "ol"; sp.dataset.c = c; }   /* letters of the typed word get the same hover glow as the rest of the site */
     target.append(sp);
   });
 }
@@ -676,7 +714,7 @@ if (location.hash) openPanel(location.hash.slice(1), false);
   const set = (plain, save) => {
     if (plain) {                                   /* drop any tint or glow that is mid-fade */
       clearTimeout(bgTimer);
-      page.style.backgroundColor = ""; page.style.removeProperty("--bar"); page.style.removeProperty("--a-color");
+      page.style.backgroundColor = ""; page.style.removeProperty("--bar");
       document.querySelectorAll("#aura .orb").forEach(o => o.remove());
     }
     page.classList.toggle("plain", plain);
@@ -731,6 +769,8 @@ if (location.hash) openPanel(location.hash.slice(1), false);
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(update);
   update();
 })();
+
+if (!page.classList.contains("plain")) startAmbient();   /* the background starts drifting through the palette */
 </script>
 </body>
 </html>
