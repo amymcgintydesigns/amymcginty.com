@@ -28,8 +28,9 @@
   /* ---------- Header: logo left, nav right ---------- */
   .top { position: absolute; inset: 0 0 auto 0; z-index: 5; display: flex; justify-content: flex-end; align-items: flex-start; gap: 1.5rem; padding: calc(var(--pad) * .8) var(--pad); padding-top: max(calc(var(--pad) * .8), env(safe-area-inset-top)); }
   .logo { text-decoration: none; font-size: clamp(1.1rem, 2.8vw, 1.7rem); line-height: 1.2; position: fixed; left: var(--pad); top: max(calc(var(--pad) * .8), env(safe-area-inset-top)); z-index: 6; max-width: 50vw; opacity: 0; pointer-events: none; transition: opacity .5s ease; }   /* pinned top left; hidden on the hero, shown once you scroll past it */
+  .logo.over { mix-blend-mode: difference; }   /* over text the name inverts against what is beneath it, so it never melts into the copy */
   .logo.show { opacity: 1; pointer-events: auto; }
-  .namebar { position: fixed; top: 0; left: 0; right: 0; z-index: 4; height: calc(max(calc(var(--pad) * .8), env(safe-area-inset-top)) + clamp(1.1rem, 2.8vw, 1.7rem) * 1.2 + var(--pad) * .8); background: var(--bar, var(--bg)); opacity: 0; pointer-events: none; transition: opacity .5s ease, background-color 1.2s ease; }   /* full-width strip behind the pinned name; takes the page's current color */
+  .namebar { position: fixed; top: 0; left: 0; right: 0; z-index: 4; height: calc(max(calc(var(--pad) * .8), env(safe-area-inset-top)) + clamp(1.1rem, 2.8vw, 1.7rem) * 1.2 + var(--pad) * .8); background: transparent; opacity: 0; pointer-events: none; transition: opacity .5s ease; }   /* strip behind the pinned name: transparent */
   .namebar.show { opacity: 1; }
   .logo::before { content: ""; position: absolute; inset: -95% -45%; z-index: -1; background: var(--glow, #2f6bff); opacity: 0; -webkit-mask-image: radial-gradient(ellipse at center, #000 0%, transparent 68%); mask-image: radial-gradient(ellipse at center, #000 0%, transparent 68%); transition: background-color .4s ease, opacity 1.6s ease; }
   .logo.glow::before { opacity: .4; transition: background-color .4s ease, opacity .3s ease; }
@@ -90,7 +91,7 @@
   .awards h3 { flex: 0 0 100%; margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(1.2rem, 2.8vw, 1.8rem); line-height: 1.2; color: var(--fg); }
   .awards .brands { display: block; margin: 0; width: auto; }
   .awards .brands li { width: auto; min-height: 0; }
-  .awards .brands img { height: 200px; }
+  .awards .brands img { height: auto; width: min(240px, 100%); }   /* same footprint as a brand logo cell */
   .panel .body .awards .award-copy { margin: 0; font-family: var(--sans); font-size: 1rem; line-height: 1.55; max-width: 52ch; }
   .alphabet h2, .music h2, .swatches h2 { font-size: clamp(1.4rem, 4vw, 2.6rem); font-weight: 400; line-height: 1.1; margin: 0 0 1.5rem; }
   .abc { display: flex; flex-wrap: wrap; gap: .1rem .7rem; font-size: clamp(1.5rem, 5vw, 2.6rem); line-height: 1.25; }
@@ -120,8 +121,14 @@
   .intro { font-size: clamp(1.15rem, 2.3vw, 1.65rem); line-height: 1.5; }
   .try, footer { font-size: .95rem; }
   .brands { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 3rem 2rem; align-items: center; justify-items: center; }
-  .brands li { display: flex; align-items: center; justify-content: center; min-height: 200px; width: 100%; }
-  .brands img { max-width: 100%; height: 200px; object-fit: contain; width: auto; filter: brightness(0) invert(1); opacity: .92; }
+  .brands li { display: flex; align-items: center; justify-content: center; min-height: 300px; width: 100%; }
+  .brands img { max-width: 100%; height: 300px; object-fit: contain; width: auto; filter: brightness(0) invert(1); opacity: .92; }
+  .brands li { transition: transform .3s; }
+  .brands li:hover, .brands li:focus-within { transform: scale(1.1); }
+  .brands img { transition: filter .3s, opacity .3s; }
+  .brands li:hover img { opacity: 1; filter: brightness(0) invert(1) drop-shadow(0 0 22px var(--hc, #fff)); }
+  .plain .brands li:hover { transform: none; }
+  .plain .brands li:hover img { filter: brightness(0) invert(1); }
   .brands .nm { font-family: var(--serif); font-size: clamp(1.1rem, 2.4vw, 1.5rem); text-align: center; }
   .social.inline { position: static; justify-content: flex-start; gap: 1rem; margin-top: 1.5rem; }
   .social.inline a:first-child { margin-left: -10px; }
@@ -193,8 +200,8 @@
 
 <div class="page">
 <div class="namebar" aria-hidden="true"></div>
+<a class="logo syn" href="#top" aria-label="Amy McGinty, back to top">Amy McGinty</a>
 <header class="top">
-  <a class="logo syn" href="#top" aria-label="Amy McGinty, back to top">Amy McGinty</a>
   <nav aria-label="Main">
     <ul>
       <!-- To add a page section: add a <li> here and a matching <details class="panel" id="..."> below -->
@@ -689,6 +696,39 @@ if (location.hash) openPanel(location.hash.slice(1), false);
   });
 })();
 
+/* Logos get the same hover as the social icons: they grow a little and glow in the color of the name's first letter */
+(function brandHover() {
+  document.querySelectorAll(".brands li").forEach(li => {
+    const pool = [...new Set(Object.values(COLORS))];
+    li.addEventListener("pointerenter", () => {
+      if (page.classList.contains("plain")) return;
+      let c; do { c = pool[Math.floor(Math.random() * pool.length)]; } while (c === li.dataset.c && pool.length > 1);
+      li.dataset.c = c; li.style.setProperty("--hc", c);
+      glow(li);
+    });
+  });
+})();
+
+/* Pinned name: when it passes over text, it takes the inverse of what is beneath so it stays readable */
+(function nameOverText() {
+  const logo = document.querySelector(".logo"); if (!logo) return;
+  const sel = ".body p, .body li, .panel > summary, .try, .out, footer span, .award-copy, .brands .nm";
+  let tick = false;
+  const check = () => {
+    tick = false;
+    const r = logo.getBoundingClientRect();
+    const hit = [...document.querySelectorAll(sel)].some(el => {
+      const b = el.getBoundingClientRect();
+      return b.width && b.height && b.bottom > r.top && b.top < r.bottom && b.right > r.left && b.left < r.right;
+    });
+    logo.classList.toggle("over", hit && !page.classList.contains("plain"));
+  };
+  const req = () => { if (!tick) { tick = true; requestAnimationFrame(check); } };
+  addEventListener("scroll", req, { passive: true }); addEventListener("resize", req);
+  document.addEventListener("toggle", req, true);
+  check();
+})();
+
 /* My eyes / Your eyes toggle */
 (function eyes() {
   const mine = document.getElementById("eyesMine"), yours = document.getElementById("eyesYours");
@@ -712,10 +752,13 @@ if (location.hash) openPanel(location.hash.slice(1), false);
 /* Social icons: hover takes a letter's color (set data-letter on the link to change it), with the same glow and page tint as the copy */
 (function socialColor() {
   document.querySelectorAll(".social a[data-letter]").forEach(a => {
+    const pool = [...new Set(Object.values(COLORS))];
     a.dataset.c = COLORS[a.dataset.letter.toUpperCase()];
     const go = () => {
       if (page.classList.contains("plain")) return;
       clearTimeout(a._t);
+      let next; do { next = pool[Math.floor(Math.random() * pool.length)]; } while (next === a.dataset.c && pool.length > 1);   /* a new palette color every hover */
+      a.dataset.c = next;
       a.style.color = shown(a.dataset.c);
       glow(a);
       a._t = setTimeout(() => { a.style.color = ""; }, HOLD_MS);
