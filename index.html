@@ -32,6 +32,13 @@
   .namebar.show { opacity: 1; }
   .logo::before { content: ""; position: absolute; inset: -95% -45%; z-index: -1; background: var(--glow, #2f6bff); opacity: 0; -webkit-mask-image: radial-gradient(ellipse at center, #000 0%, transparent 68%); mask-image: radial-gradient(ellipse at center, #000 0%, transparent 68%); transition: background-color .4s ease, opacity 1.6s ease; }
   .logo.glow::before { opacity: .4; transition: background-color .4s ease, opacity .3s ease; }
+  /* While a song plays, its colors drift across the whole screen (behind the content). Blob colors are set from the song in JS. */
+  #flow { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 1.8s ease; }
+  #flow.on { opacity: 1; }
+  #flow i { position: absolute; width: 85vmax; height: 85vmax; border-radius: 50%; background: radial-gradient(circle closest-side, var(--fc, transparent) 0%, transparent 100%); opacity: .6; animation: flowdrift var(--fd, 20s) ease-in-out infinite alternate; transition: background 1.2s ease; will-change: translate; }
+  @keyframes flowdrift { from { translate: 0 0; } to { translate: var(--dx, 30vw) var(--dy, 20vh); } }
+  @media (prefers-reduced-motion: reduce) { #flow i { animation: none; } }
+  .plain #flow { display: none; }
   #aura { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
   .orb { position: absolute; border-radius: 50%; opacity: 0; filter: blur(6px); }
   nav { text-align: right; flex: 0 1 auto; max-width: min(46vw, 21rem); }
@@ -59,7 +66,7 @@
 
   /* ---------- Sections as accordion panels ---------- */
   main { max-width: 1100px; margin: 0 auto; padding: 0 var(--pad); }
-  .panel .body .alphabet { font-family: var(--serif); max-width: none; margin: 2.5rem 0 1rem; }
+  .panel .body .alphabet { font-family: var(--serif); max-width: none; margin: 45px 0 1rem; }
   .panel { border-top: 1px solid var(--line); scroll-margin-top: 1rem; }
   .panel:last-of-type { border-bottom: 1px solid var(--line); }
   .panel > summary { list-style: none; cursor: pointer; display: flex; justify-content: flex-start; column-gap: .35em; align-items: baseline; padding: 1.6rem 0; font-size: clamp(1.4rem, 4vw, 2.6rem); font-weight: 400; line-height: 1.1; }
@@ -79,7 +86,7 @@
   .awards .brands { display: block; margin: 0; width: auto; }
   .awards .brands li { width: auto; min-height: 0; }
   .awards .brands img { height: 64px; }
-  .awards .award-copy { margin: 0; font-family: var(--sans); font-size: 1rem; line-height: 1.55; max-width: 52ch; }
+  .panel .body .awards .award-copy { margin: 0; font-family: var(--sans); font-size: 1rem; line-height: 1.55; max-width: 52ch; }
   .alphabet h2, .music h2, .swatches h2 { font-size: clamp(1.4rem, 4vw, 2.6rem); font-weight: 400; line-height: 1.1; margin: 0 0 1.5rem; }
   .abc { display: flex; flex-wrap: wrap; gap: .1rem .7rem; font-size: clamp(1.5rem, 5vw, 2.6rem); line-height: 1.25; }
   .try { display: block; margin: 2.25rem 0 .4rem; color: var(--muted); font-size: .9rem; }
@@ -87,6 +94,7 @@
   #word { width: 100%; max-width: 640px; background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; color: #fff; font: inherit; font-size: 16px; padding: .5rem 0; }   /* was 17.6px (about 10% smaller); 16px is the floor that keeps iPhones from zooming in */
   #word:focus, #word:focus-visible { outline: none; }
   .out { font-size: clamp(1.4rem, 5.76vw, 3.84rem); line-height: 1.15; min-height: 1.2em; margin-top: 1rem; overflow-wrap: anywhere; }
+  .out + .abc { margin-top: 2rem; }
   .panel .body.wide { max-width: none; }
   .contact a.book { display: inline-block; margin-top: .5rem; padding: .85rem 2.2rem; border: 1px solid var(--fg); border-radius: 999px; font-family: var(--sans); font-size: 1.05rem; line-height: 1; color: var(--fg); text-decoration: none; transition: background-color .3s, color .3s; }
   .contact a.book:hover, .contact a.book:focus-visible { background: rgba(255,255,255,.14); }
@@ -105,8 +113,8 @@
   .intro { font-size: clamp(1.15rem, 2.3vw, 1.65rem); line-height: 1.5; }
   .try, footer { font-size: .95rem; }
   .brands { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 3rem 2rem; align-items: center; justify-items: center; }
-  .brands li { display: flex; align-items: center; justify-content: center; min-height: 64px; width: 100%; }
-  .brands img { max-width: 100%; height: 56px; width: auto; filter: brightness(0) invert(1); opacity: .92; }
+  .brands li { display: flex; align-items: center; justify-content: center; min-height: 72px; width: 100%; }
+  .brands img { max-width: 100%; height: 64px; width: auto; filter: brightness(0) invert(1); opacity: .92; }
   .brands .nm { font-family: var(--serif); font-size: clamp(1.1rem, 2.4vw, 1.5rem); text-align: center; }
   .social.inline { position: static; justify-content: flex-start; gap: 1rem; margin-top: 1.5rem; }
   .social.inline a:first-child { margin-left: -10px; }
@@ -174,6 +182,7 @@
 </head>
 <body>
 <div id="aura" aria-hidden="true"></div>
+<div id="flow" aria-hidden="true"></div>
 
 <div class="page">
 <div class="namebar" aria-hidden="true"></div>
@@ -204,21 +213,20 @@
   <details class="panel" id="about">
     <summary class="syn">About me</summary>
     <div class="body">
-      <p>Building brands people feel long before they see a logo. Fifteen years in, I still love what I do. My work goes beyond shaping identities and systems, deep into storytelling, capturing the human experience.</p>
-      <p>I see the world in color. Letters, numbers, countries, and music all arrive for me already tinted. Color isn’t decoration for me; it’s information. It’s how I read a room, design, and tell when something is finished.</p>
-      <p>I’m an art director with ten years as a senior creative at one of the world’s leading technology companies.<br>I care about the details most people never notice because that’s usually where a brand either feels right or doesn’t.</p>
-      <p>I’m looking for the next step up, leading bigger ideas and the teams who bring them to life.</p>
+      <p>I’m an art director with ten years as a senior creative at one of the world’s leading technology companies.</p>
+      <p>I care about the details most people never notice because that’s usually where a brand either feels right or doesn’t. Fifteen years in, I still love what I do. My work goes beyond shaping identities and systems, deep into storytelling, capturing the human experience to build brands people feel long before they see a logo.</p>
+      <p>I see the world in color. Letters, numbers, countries, and music all arrive for me already tinted. Color isn’t decoration for me; it’s information. It’s how I read a room, design, and tell when something is finished. Right now I’m deep in the pits of Motherhood, trying to figure out AI and looking for the next step up, leading bigger ideas and the teams who bring them to life.</p>
 
       <section class="swatches" aria-label="My alphabet as color swatches">
-        <h2 class="syn">perception palette</h2>
-        <section class="alphabet" aria-label="My alphabet">
-        <div class="abc" id="abc" aria-label="Each letter and number in the color I see it"></div>
-        <label class="try" for="word">type a word, see it the way I do</label>
-        <input id="word" type="text" maxlength="24" placeholder="How I see you" autocomplete="off" autocapitalize="off" spellcheck="false">
-        <div class="out" id="out" aria-live="polite"></div>
-      </section>
+        <h2 class="syn">How I see the world</h2>
         <ul class="chips" id="chips"></ul>
         <p class="fine">Nearest Pantone® TCX match to each of my colors. Matches are approximate.</p>
+        <section class="alphabet" aria-label="My alphabet">
+        <label class="try" for="word">type a word, see it the way I do</label>
+        <input id="word" type="text" maxlength="24" placeholder="What do you see" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <div class="out" id="out" aria-live="polite"></div>
+        <div class="abc" id="abc" aria-label="Each letter and number in the color I see it"></div>
+      </section>
       </section>
 
       <section class="music" aria-label="Music">
@@ -417,7 +425,7 @@ function bloom(el, hex) {
 /* A letter shows its own color, unless that would blend into the background: then it shows white so it never disappears */
 const lumOf = ([r, g, b]) => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
 const contrast = (a, b) => { const x = lumOf(a), y = lumOf(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
-const shown = (hex, bg) => contrast(rgb(hex), (String(bg || curBg()).match(/[\d.]+/g) || [47, 107, 255]).slice(0, 3).map(Number)) < 2.2 ? "#fff" : hex;
+const shown = (hex, bg) => contrast(rgb(hex), (String(bg || curBg()).match(/[\d.]+/g) || [47, 107, 255]).slice(0, 3).map(Number)) < 1.5 ? "#fff" : hex;
 /* the typed word and the alphabet row re-check their letters whenever the background changes */
 function fixWord() {
   const bg = targetBg();
@@ -608,6 +616,12 @@ if (document.getElementById("abc")) {   /* home page only */
         artist = document.getElementById("nowArtist"), toggle = document.getElementById("nowToggle");
   const audio = new Audio();
   audio.preload = "none";
+  /* full-screen drifting gradient in the song's colors, shown while it plays */
+  const flow = document.getElementById("flow");
+  const FLOW = [["-20%", "-25%", "-35vw", "30vh", "23s"], ["45%", "-30%", "-30vw", "35vh", "29s"], ["-25%", "40%", "40vw", "-28vh", "26s"], ["40%", "35%", "-38vw", "-32vh", "32s"], ["15%", "10%", "28vw", "26vh", "36s"]];
+  if (flow) FLOW.forEach(([x, y, dx, dy, d]) => { const i = document.createElement("i"); i.style.cssText = `left:${x};top:${y};--dx:${dx};--dy:${dy};--fd:${d}`; flow.append(i); });
+  const flowColors = b => { const c = [...new Set((b.dataset.glow || "").match(/#[0-9a-f]{6}/gi) || [])]; return c.length ? c : [b.dataset.color]; };
+  const setFlow = b => { if (!flow) return; const c = flowColors(b); [...flow.children].forEach((el, i) => el.style.setProperty("--fc", c[i % c.length])); };
   document.addEventListener("eyes-plain", () => audio.pause());   /* switching to Your eyes stops any song */
   const say = msg => { status.textContent = msg; };
   const buttons = [...list.querySelectorAll("button")];
@@ -635,7 +649,7 @@ if (document.getElementById("abc")) {   /* home page only */
 
   let current = null;
   async function choose(b) {
-    current = b;
+    current = b; setFlow(b);
     buttons.forEach(x => x.classList.toggle("active", x === b));
     now.classList.add("swap");                              /* fade the old glow out, then bring in this song's own */
     setTimeout(() => {
@@ -661,9 +675,9 @@ if (document.getElementById("abc")) {   /* home page only */
   }
   buttons.forEach(b => b.addEventListener("click", () => choose(b)));
 
-  audio.addEventListener("play", () => { now.classList.add("playing"); toggle.textContent = "pause"; });
-  audio.addEventListener("pause", () => { now.classList.remove("playing"); toggle.textContent = "play"; });
-  audio.addEventListener("ended", () => { now.classList.remove("playing"); toggle.textContent = "play again"; });
+  audio.addEventListener("play", () => { if (flow) flow.classList.add("on"); now.classList.add("playing"); toggle.textContent = "pause"; });
+  audio.addEventListener("pause", () => { if (flow) flow.classList.remove("on"); now.classList.remove("playing"); toggle.textContent = "play"; });
+  audio.addEventListener("ended", () => { if (flow) flow.classList.remove("on"); now.classList.remove("playing"); toggle.textContent = "play again"; });
   toggle.addEventListener("click", () => {
     if (!audio.src) { if (current) choose(current); return; }
     if (audio.paused) { if (audio.ended) audio.currentTime = 0; audio.play(); } else audio.pause();
