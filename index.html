@@ -104,7 +104,7 @@
   .awards h3 { flex: 0 0 100%; margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(1.2rem, 2.8vw, 1.8rem); line-height: 1.2; color: var(--fg); }
   .awards .brands { display: block; margin: 0; width: auto; }
   .awards .brands li { width: auto; min-height: 0; }
-  .awards .brands img { height: 140px; }
+  .awards .brands img { height: 119px; }
   .panel .body .awards .award-copy { margin: 0; font-family: var(--sans); font-size: 1rem; line-height: 1.55; max-width: 52ch; }
   .alphabet h2, .music h2, .swatches h2 { font-size: clamp(1.4rem, 4vw, 2.6rem); font-weight: 400; line-height: 1.1; margin: 0 0 1.5rem; }
   .abc { display: flex; flex-wrap: wrap; gap: .1rem .7rem; font-size: clamp(1.5rem, 5vw, 2.6rem); line-height: 1.25; }
@@ -117,6 +117,9 @@
   .panel .body.wide { max-width: none; }
   #about .contact { margin-top: 2rem; }
   .contact a.book { display: inline-block; margin-top: .5rem; padding: .85rem 2.2rem; border: 1px solid var(--fg); border-radius: 999px; font-family: var(--sans); font-size: 1.05rem; line-height: 1; color: var(--fg); text-decoration: none; transition: background-color .3s, color .3s; }
+  .contact p { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.75rem; }
+  .contact a.resume { font-family: var(--sans); font-size: 1.05rem; color: var(--fg); border-bottom: 1px solid var(--fg); padding-bottom: .2em; margin-top: .5rem; }   /* a border, because the per-letter spans stop a text underline */
+  .contact a.resume:hover, .contact a.resume:focus-visible { border-bottom-width: 2px; }
   .contact a.book:hover, .contact a.book:focus-visible { background: rgba(255,255,255,.14); }
   .contact a.mail { font-size: clamp(1.4rem, 4vw, 2.2rem); font-weight: 700; color: var(--fg); }
   footer { max-width: 1100px; margin: 0 auto; padding: 2.5rem var(--pad) 3rem; display: flex; justify-content: space-between; color: var(--muted); font-size: .95rem; }
@@ -184,7 +187,7 @@
   .now { position: relative; display: flex; align-items: center; gap: 1rem; max-width: 640px; margin-top: 2.5rem; padding: 1rem 0; font-family: var(--sans); }
   .now[hidden] { display: none; }
   .now::before { content: ""; position: absolute; inset: -150% -45%; z-index: -1; pointer-events: none; background: var(--song-bg, var(--song, #fff)); opacity: 0; -webkit-mask-image: radial-gradient(ellipse at center, #000 0%, transparent 66%); mask-image: radial-gradient(ellipse at center, #000 0%, transparent 66%); transition: background-color 1.2s ease, opacity 1.2s ease; }
-  .now.playing::before { opacity: .9; animation: songpulse 2.6s ease-in-out infinite; }
+  .now::before { display: none; }   /* no glow behind the player: the color lives only in the full-screen flow */
   @keyframes songpulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
   .now img { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; flex: none; background: rgba(255,255,255,.12); }
   .now .meta { display: grid; gap: .1rem; min-width: 0; flex: 1; line-height: 1.3; }
@@ -258,7 +261,7 @@
       <p>Is that why you’re here?</p>
 
       <div class="contact">
-      <p><a class="book" href="mailto:amcginty85@gmail.com?subject=Let%E2%80%99s%20find%20time">Let’s find time</a></p>
+      <p><a class="book" href="mailto:amcginty85@gmail.com?subject=Let%E2%80%99s%20find%20time">Let’s find time</a> <a class="resume" href="resume.pdf" download="Amy-McGinty-Resume.pdf">Download resume</a></p>
       </div>
 
       <section class="swatches" aria-label="My alphabet as color swatches">
