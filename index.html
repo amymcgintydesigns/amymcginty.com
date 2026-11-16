@@ -54,19 +54,31 @@
   /* ---------- Hero ---------- */
   .hero { position: relative; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 6rem var(--pad); }
   .hero h1 { margin: 0; text-align: center; font-size: clamp(2.8rem, 10.5vw, 9.5rem); line-height: 1.15; font-weight: var(--w); max-width: min(92vw, 1200px); text-wrap: balance; transition: opacity .6s ease; }
-  .hero h1 { display: none; }   /* the definition is the headline in both My eyes and Your eyes; the name is pinned at the top */
-  .def { max-width: min(92vw, 62rem); text-align: left; font-family: var(--serif); }
+  .hero h1 { display: none; }   /* the definition leads; once both meanings have played it fades out and this line takes its place */
+  .hero h1.final { font-size: clamp(2rem, 6.4vw, 5.6rem); }
+  .hero-text { transition: transform .8s ease; }
+  .hero.finale .hero-text { transform: translateY(-1.6rem); }   /* the headline and the prompt below it sit centered together */
+  .hero.finale h1 { display: block; animation: finalin 1.2s ease both; }
+  .hero.finale .def { display: none; }
+  .def.out { opacity: 0; transition: opacity .8s ease; }
+  @keyframes finalin { from { opacity: 0; } to { opacity: 1; } }
+  .def { max-width: min(92vw, 62rem); text-align: center; font-family: var(--serif); margin: 0 auto; }
   .def-head { margin: 0 0 1.6rem; font-size: clamp(2.3rem, 8vw, 5.2rem); line-height: 1.1; }
-  .def-pos { font-size: .45em; opacity: .75; margin-left: .4em; }
+  .def-pos { font-size: .45em; font-weight: 700; opacity: .75; margin-left: .4em; }
+  .def-pos .l { font-weight: 700; }
   .def-list { list-style: none; margin: 0; padding: 0; font-family: var(--sans); font-size: clamp(1rem, 2vw, 1.3rem); line-height: 1.6; }
-  .def-list { display: grid; max-width: 44rem; }
-  .def-list li { grid-area: 1 / 1; align-self: start; display: grid; grid-template-columns: 1.8em 1fr; gap: .4em; opacity: 0; transition: opacity .6s ease; pointer-events: none; }   /* the definitions sit in one spot and take turns */
+  .def-list { display: grid; max-width: 44rem; margin: 0 auto; }
+  .def-list li { grid-area: 1 / 1; align-self: start; display: block; text-align: center; opacity: 0; transition: opacity .6s ease; pointer-events: none; }   /* the definitions sit in one spot and take turns */
   .def-list li.on { opacity: 1; pointer-events: auto; }
   .def-list.all li { grid-area: auto; opacity: 1; margin-bottom: 1.1rem; pointer-events: auto; }   /* reduced motion: both shown */
-  .def-n { opacity: .75; }
-  .mine-b, .plain .mine-a { display: none; }   /* Your eyes: "These are yours." */
+  .def-n { opacity: .75; margin-right: .6em; }
+  @media (min-width: 1100px) {   /* wide screens: each line of the definition stays on one line, shrinking with the window */
+    .def { max-width: 94vw; }
+    .def-list { max-width: none; font-size: min(1.18vw, 1.1rem); }
+    .def-list li { white-space: nowrap; }
+  }
+  .mine-b, .plain .mine-a { display: none; }   /* Your eyes: "you" */
   .plain .mine-b { display: inline; }
-  .def-list .def-mine { grid-template-columns: 1fr; font-size: 1.15em; }
   .hero h1.long { font-size: clamp(2.1rem, 7.2vw, 6.8rem); }
 
   /* every letter inside .syn becomes a span.l */
@@ -76,6 +88,14 @@
   .hero-text { position: relative; }
   .hint { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: max-content; max-width: 90vw; margin: 0; padding-top: clamp(1.5rem, 3.5vw, 2.5rem); text-align: center; font-size: clamp(1.3rem, 3vw, 2rem); font-weight: 400; line-height: 1.4; color: var(--muted); transition: opacity 1.2s ease; pointer-events: none; }
   .hint { letter-spacing: normal; }
+  .hero:not(.finale):not(.static) .hint { opacity: 0; visibility: hidden; }   /* the prompt waits for the final line */
+  .hero.finale .hint { animation: finalin 1.2s ease .4s both; }
+  .typebox { position: relative; display: inline-block; vertical-align: baseline; pointer-events: auto; }
+  .typebox input, .typebox .typed { font: inherit; letter-spacing: 0; width: calc(5ch + 2px); box-sizing: content-box; padding: 0 0 .1em; margin: 0; text-align: left; }
+  .typebox input { background: transparent; border: 0; border-bottom: 1px solid rgba(255,255,255,.65); border-radius: 0; outline: none; color: transparent; caret-color: #fff; display: block; }   /* the letters are drawn by .typed so each can take its palette color */
+  .typebox input::placeholder { color: var(--muted); opacity: 1; }
+  .typebox input:focus { border-bottom-color: #fff; }
+  .typebox .typed { position: absolute; left: 0; top: 0; pointer-events: none; white-space: pre; border-bottom: 1px solid transparent; }
   .hint .l { pointer-events: auto; }
   .hint .tag { display: block; margin-top: .6rem; font-family: var(--sans); font-size: .8rem; letter-spacing: normal; }
   .social { position: absolute; left: 0; right: 0; bottom: max(1.75rem, env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 1.5rem; }
@@ -104,7 +124,7 @@
   .awards h3 { flex: 0 0 100%; margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(1.2rem, 2.8vw, 1.8rem); line-height: 1.2; color: var(--fg); }
   .awards .brands { display: block; margin: 0; width: auto; }
   .awards .brands li { width: auto; min-height: 0; }
-  .awards .brands img { height: 119px; }
+  .awards .brands img { height: 81px; }
   .panel .body .awards .award-copy { margin: 0; font-family: var(--sans); font-size: 1rem; line-height: 1.55; max-width: 52ch; }
   .alphabet h2, .music h2, .swatches h2 { font-size: clamp(1.4rem, 4vw, 2.6rem); font-weight: 400; line-height: 1.1; margin: 0 0 1.5rem; }
   .abc { display: flex; flex-wrap: wrap; gap: .1rem .7rem; font-size: clamp(1.5rem, 5vw, 2.6rem); line-height: 1.25; }
@@ -234,16 +254,15 @@
 
 <section class="hero" id="top">
   <div class="hero-text">
-    <h1 class="syn">Amy McGinty</h1>
+    <h1 class="syn final"><span class="mine-a">This is how I experience the world.</span><span class="mine-b">Is this how you experience the world?</span></h1>
     <div class="def">
       <p class="def-head"><span class="syn">syn·es·the·sia</span> <span class="syn def-pos">(noun)</span></p>
       <ol class="def-list">
         <li><span class="syn def-n">1</span> <span><span class="syn">: a concomitant sensation</span><br><span class="syn">especially : a subjective sensation or image of a sense (as of color) other than the one (as of sound) being stimulated</span></span></li>
         <li><span class="syn def-n">2</span> <span class="syn">: the condition marked by the experience of such sensations</span></li>
-        <li class="def-mine"><span class="syn mine-a">These are mine.</span><span class="syn mine-b">These are yours.</span></li>
       </ol>
     </div>
-    <h2 class="hint syn" id="hint">Move. Tap. Type.</h2>
+    <h2 class="hint syn" id="hint">Move. Tap. <span class="typebox"><input id="heroType" type="text" maxlength="6" placeholder="Type." aria-label="Type up to six characters" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"><span class="typed" aria-hidden="true"></span></span></h2>
   </div>
   <div class="social">
     <a href="https://www.linkedin.com/in/amy-mcginty-poso" aria-label="LinkedIn" data-letter="N" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>
@@ -313,7 +332,7 @@
         <ul class="brands" id="awards">
           <li data-name="Cannes Lions"><img src="logos/cannes-lions.svg" alt="Cannes Lions"></li>
         </ul>
-        <p class="award-copy">2018 Brand Experience &amp; Activation Grand Prix<br>2026 In-House Agency of the Year</p>
+        <p class="award-copy">2018 Brand Experience &amp; Activation Grand Prix, Today at Apple<br>2026 In-House Agency of the Year, Marcom LA</p>
       </section>
     </div>
   </details>
@@ -566,7 +585,7 @@ if (document.getElementById("abc")) {   /* home page only */
   };
 
   hero.addEventListener("pointerdown", e => {          /* ripple outward from the touch point */
-    if (e.target.closest("a")) return;
+    if (e.target.closest("a, input")) return;
     letters().forEach(el => {
       const [cx, cy] = center(el);
       setTimeout(() => paint(el), Math.hypot(e.clientX - cx, e.clientY - cy) * .9);
@@ -737,15 +756,33 @@ if (location.hash) openPanel(location.hash.slice(1), false);
 
 /* The two definitions take turns: 1, then 2, then back to 1 */
 (function defRotate() {
-  const list = document.querySelector(".def-list"); if (!list) return;
-  const items = [...list.children]; let n = 0;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { list.classList.add("all"); return; }
+  const list = document.querySelector(".def-list"), def = document.querySelector(".def"), hero = document.querySelector(".hero"); if (!list) return;
+  const items = [...list.children];
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { list.classList.add("all"); hero.classList.add("static"); return; }
   items[0].classList.add("on");
-  setInterval(() => {
-    items[n].classList.remove("on");
-    n = (n + 1) % items.length;
-    setTimeout(() => items[n].classList.add("on"), 600);
-  }, 7000);
+  setTimeout(() => { items[0].classList.remove("on"); setTimeout(() => items[1].classList.add("on"), 600); }, 7000);   /* 1, then 2 */
+  setTimeout(() => { def.classList.add("out"); setTimeout(() => hero.classList.add("finale"), 800); }, 14000);   /* then all the definition clears and the line replaces it */
+})();
+
+
+/* Type: place the cursor in "Type." and write up to six characters. Each one takes its palette color, and lights the matching letters in the headline. */
+(function heroType() {
+  const input = document.getElementById("heroType"), out = document.querySelector(".typed"); if (!input || !out) return;
+  const render = () => {
+    input.style.width = `calc(${(input.value.length || 5)}ch + 2px)`;   /* the underline is as long as what is shown: 5 for the "Type." prompt, then one per character */
+    out.textContent = "";
+    [...input.value].forEach(ch => {
+      const sp = document.createElement("span"); sp.textContent = ch;
+      const hex = COLORS[ch.toUpperCase()]; sp.style.color = hex ? shown(hex) : "#fff"; out.appendChild(sp);
+    });
+  };
+  input.addEventListener("input", e => {
+    render();
+    const ch = (e.data || "").toUpperCase();
+    if (ch.length === 1 && COLORS[ch] && !page.classList.contains("plain"))
+      document.querySelectorAll(".hero h1 .l, .hero .def .l").forEach(el => { if (el.offsetParent && el.dataset.c && el.textContent.toUpperCase() === ch) paint(el); });
+  });
+  input.addEventListener("keydown", e => { if (e.key === "Enter") input.blur(); });
 })();
 
 /* My eyes / Your eyes toggle */
