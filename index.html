@@ -62,21 +62,16 @@
   .hero.finale .def { display: none; }
   .def.out { opacity: 0; transition: opacity .8s ease; }
   @keyframes finalin { from { opacity: 0; } to { opacity: 1; } }
-  .def { max-width: min(92vw, 62rem); text-align: center; font-family: var(--serif); margin: 0 auto; }
+  .def { width: fit-content; max-width: 92vw; text-align: center; font-family: var(--serif); margin: 0 auto; }   /* as wide as the headline; the definitions are justified to that width */
   .def-head { margin: 0 0 1.6rem; font-size: clamp(2.3rem, 8vw, 5.2rem); line-height: 1.1; }
-  .def-pos { font-size: .45em; font-weight: 700; opacity: .75; margin-left: .4em; }
-  .def-pos .l { font-weight: 700; }
-  .def-list { list-style: none; margin: 0; padding: 0; font-family: var(--sans); font-size: clamp(1rem, 2vw, 1.3rem); line-height: 1.6; }
-  .def-list { display: grid; max-width: 44rem; margin: 0 auto; }
-  .def-list li { grid-area: 1 / 1; align-self: start; display: block; text-align: center; opacity: 0; transition: opacity .6s ease; pointer-events: none; }   /* the definitions sit in one spot and take turns */
+  .def-pos { font-family: var(--serif); font-size: .3em; font-weight: 400; opacity: 1; margin-left: .4em; }   /* same face and weight as the headline */
+  .def-pos .l { font-weight: 400; }
+  .def-list { list-style: none; margin: 0; padding: 0; font-family: var(--sans); font-size: clamp(.95rem, 1.5vw, 1.15rem); line-height: 1.6; }
+  .def-list { display: grid; width: 0; min-width: 100%; margin: 0; }   /* width 0 + min 100%: the list takes the headline's width and never makes it wider */
+  .def-list li { grid-area: 1 / 1; align-self: start; display: block; text-align: justify; text-align-last: left; hyphens: manual; opacity: 0; transition: opacity .6s ease; pointer-events: none; }   /* the definitions sit in one spot and take turns */
   .def-list li.on { opacity: 1; pointer-events: auto; }
   .def-list.all li { grid-area: auto; opacity: 1; margin-bottom: 1.1rem; pointer-events: auto; }   /* reduced motion: both shown */
   .def-n { opacity: .75; margin-right: .6em; }
-  @media (min-width: 1100px) {   /* wide screens: each line of the definition stays on one line, shrinking with the window */
-    .def { max-width: 94vw; }
-    .def-list { max-width: none; font-size: min(1.18vw, 1.1rem); }
-    .def-list li { white-space: nowrap; }
-  }
   .mine-b, .plain .mine-a { display: none; }   /* Your eyes: "you" */
   .plain .mine-b { display: inline; }
   .hero h1.long { font-size: clamp(2.1rem, 7.2vw, 6.8rem); }
@@ -258,7 +253,7 @@
     <div class="def">
       <p class="def-head"><span class="syn">syn·es·the·sia</span> <span class="syn def-pos">(noun)</span></p>
       <ol class="def-list">
-        <li><span class="syn def-n">1</span> <span><span class="syn">: a concomitant sensation</span><br><span class="syn">especially : a subjective sensation or image of a sense (as of color) other than the one (as of sound) being stimulated</span></span></li>
+        <li><span class="syn def-n">1</span> <span class="syn">: a concomitant sensation especially : a subjective sensation or image of a sense (as of color) other than the one (as of sound) being stimulated</span></li>
         <li><span class="syn def-n">2</span> <span class="syn">: the condition marked by the experience of such sensations</span></li>
       </ol>
     </div>
@@ -275,8 +270,8 @@
     <summary class="syn">About me</summary>
     <div class="body">
       <p>I’m an art director with ten years as a senior creative at one of the world’s leading technology companies.</p>
-      <p>I care about the details most people don’t notice because that’s usually where a Brand either feels right or doesn’t. Fifteen years in, I still love what I do. My work goes beyond shaping identities and systems, deep into storytelling, capturing the human experience to build brands people feel long before they see a logo.</p>
-      <p>I see the world in literal color. Letters, numbers and music all arrive for me already tinted. Color isn’t decoration; it’s information. It’s how I read a room, conceptualize, and tell when something is finished. Right now I’m busy chasing my two kids around whilst dabbling with AI.  But I’m hungry, and I’m chasing bigger ideas and the teams who bring them to life.</p>
+      <p>I care about the details most people don’t notice because that’s usually where a Brand either feels right or doesn’t. Fifteen years in, I still love what I do. My work goes beyond shaping identities and systems, deep into storytelling, capturing the human experience to build something people feel long before they see a logo.</p>
+      <p>For me, I see the world in literal color. Letters, numbers and music all arrive for me tinted. Color isn’t decoration; it’s information. It’s how I read a room, conceptualize, and tell when something is finished. Right now I’m busy chasing my two kids around whilst dabbling in AI. But I’m hungry, and I’m chasing bigger ideas and the teams who bring them to life.</p>
       <p>Is that why you’re here?</p>
 
       <div class="contact">
