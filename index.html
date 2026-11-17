@@ -208,20 +208,20 @@
   .now .meta { display: grid; gap: .1rem; min-width: 0; flex: 1; line-height: 1.3; }
   .now .meta, .now button { }
   .now.swap::before { opacity: 0 !important; transition: opacity .25s ease; }   /* brief fade-out so the glow changes smoothly between songs */
-  .now .meta strong { font-size: 1.1rem; font-weight: 700; overflow-wrap: anywhere; }
+  .now .meta strong { font-size: 1.1rem; font-weight: 400; overflow-wrap: anywhere; }
   .now .meta span { font-size: .95rem; }
   .now .meta small { opacity: .75; font-size: .8rem; }
   .panel .body .swatches { font-family: var(--serif); max-width: none; margin: 3.5rem 0 1rem; }
   .chips { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 1rem; font-family: var(--sans); }
-  .chip { background: #fff; color: #111; outline: 1px solid rgba(255,255,255,.7); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }   /* a paint-chip card: color on top, white label below */
+  .chip { background: #fff; color: #111; outline: 1px solid rgba(255,255,255,.7); font-family: var(--sans); font-weight: 400; }   /* a paint-chip card: color on top, white label below */
   .chip .block { position: relative; display: block; aspect-ratio: 1 / 1; background: var(--chip); }
-  .chip .ch { position: absolute; left: .5rem; top: .35rem; font-family: var(--sans); font-size: 1.1rem; line-height: 1.2; font-weight: 500; color: var(--on, #fff); }
+  .chip .ch { position: absolute; left: .5rem; top: .35rem; font-family: var(--sans); font-size: 1.1rem; line-height: 1.2; font-weight: 400; color: var(--on, #fff); }
   .chip .label { display: block; padding: .5rem .5rem .6rem; line-height: 1.25; text-align: left; }
-  .chip .pt { display: block; font-size: .64rem; font-weight: 700; letter-spacing: .01em; }
+  .chip .pt { display: block; font-size: .64rem; font-weight: 400; letter-spacing: .01em; }
   .chip .code { display: block; margin-top: .1rem; font-size: .58rem; font-weight: 400; color: #333; }
-  .chip .nm { display: block; margin-top: .05rem; font-size: .66rem; font-weight: 700; }
-  .chip:hover .ch { font-weight: 700; }
+  .chip .nm { display: block; margin-top: .05rem; font-size: .66rem; font-weight: 400; }
   .swatches .fine { max-width: 62ch; margin: 0; padding-top: 25px; font-family: var(--sans); font-size: .66rem; line-height: 1.5; color: var(--muted); }
+  .swatches .intro-copy b, .swatches .intro-copy b .l { font-weight: 700; }
   .swatches .intro-copy { font-family: var(--sans); font-weight: 400; max-width: 68ch; margin: 0 0 1.5rem; color: var(--muted); }   /* same as the About me copy */
   @media (prefers-reduced-motion: reduce) {
     .l, .panel > summary::after { transition: none; }
@@ -280,11 +280,11 @@
 
       <section class="swatches" aria-label="My alphabet as color swatches">
         <h2 class="syn">How I see the world</h2>
-        <p class="intro-copy">Your A might be a beautiful shade of puce. Mine’s Dazzling Blue. For the next few minutes, borrow my eyes.</p>
+        <p class="intro-copy">Your <b>A</b> might be a beautiful shade of puce. Mine’s <b>Dazzling Blue</b>. For the next few minutes, borrow my eyes.</p>
         <ul class="chips" id="chips"></ul>
         <p class="fine">Nearest Pantone® TCX match to each of my colors. Matches are approximate.</p>
         <section class="alphabet" aria-label="My alphabet">
-        <label class="try" for="word">type a word, see it the way I do</label>
+        <label class="try" for="word">Type a word, see it the way I do</label>
         <input id="word" type="text" maxlength="24" placeholder="What do you see" autocomplete="off" autocapitalize="off" spellcheck="false">
         <div class="out" id="out" aria-live="polite"></div>
         <div class="abc" id="abc" aria-label="Each letter and number in the color I see it"></div>
@@ -306,7 +306,7 @@
         <div class="now" id="now" hidden>
           <img id="nowArt" alt="" width="72" height="72">
           <div class="meta"><strong id="nowTitle"></strong><span id="nowArtist"></span></div>
-          <button type="button" id="nowToggle">pause</button>
+          <button type="button" id="nowToggle">Pause</button>
         </div>
       </section>
 
@@ -651,24 +651,24 @@ if (document.getElementById("abc")) {   /* home page only */
     }, now.hidden ? 0 : 280);
     title.textContent = b.dataset.title; artist.textContent = b.dataset.artist;
     art.removeAttribute("src"); now.hidden = false;
-    audio.pause(); say("finding the song…");
+    audio.pause(); say("Finding the song…");
     try {
       const t = await lookup(b);
       if (current !== b) return;                              /* they tapped another song meanwhile */
-      if (!t) { say("no preview available for this one"); return; }
+      if (!t) { say("No preview available for this one"); return; }
       say("");
       art.src = (t.artworkUrl100 || "").replace("100x100", "200x200");
       audio.src = t.previewUrl;
-      audio.play().catch(() => say("tap play to start the preview"));
+      audio.play().catch(() => say("Tap play to start the preview"));
     } catch (e) {
-      if (current === b) say("couldn’t reach the music service, check your connection and tap the song again");
+      if (current === b) say("Couldn’t reach the music service. Check your connection and tap the song again");
     }
   }
   buttons.forEach(b => b.addEventListener("click", () => choose(b)));
 
-  audio.addEventListener("play", () => { if (flow) flow.classList.add("on"); now.classList.add("playing"); toggle.textContent = "pause"; });
-  audio.addEventListener("pause", () => { if (flow) flow.classList.remove("on"); now.classList.remove("playing"); toggle.textContent = "play"; });
-  audio.addEventListener("ended", () => { if (flow) flow.classList.remove("on"); now.classList.remove("playing"); toggle.textContent = "play again"; });
+  audio.addEventListener("play", () => { if (flow) flow.classList.add("on"); now.classList.add("playing"); toggle.textContent = "Pause"; });
+  audio.addEventListener("pause", () => { if (flow) flow.classList.remove("on"); now.classList.remove("playing"); toggle.textContent = "Play"; });
+  audio.addEventListener("ended", () => { if (flow) flow.classList.remove("on"); now.classList.remove("playing"); toggle.textContent = "Play again"; });
   toggle.addEventListener("click", () => {
     if (!audio.src) { if (current) choose(current); return; }
     if (audio.paused) { if (audio.ended) audio.currentTime = 0; audio.play(); } else audio.pause();
