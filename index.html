@@ -26,12 +26,11 @@
   :focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 
   /* ---------- Header: logo left, nav right ---------- */
-  .top { position: absolute; inset: 0 0 auto 0; z-index: 5; display: flex; justify-content: flex-end; align-items: flex-start; gap: 1.5rem; padding: calc(var(--pad) * .8) var(--pad); padding-top: max(calc(var(--pad) * .8), env(safe-area-inset-top)); }
-  .logo { text-decoration: none; font-size: clamp(1.1rem, 2.8vw, 1.7rem); line-height: 1.2; position: fixed; left: var(--pad); top: max(calc(var(--pad) * .8), env(safe-area-inset-top)); z-index: 6; max-width: 50vw; opacity: 1; pointer-events: auto; transition: opacity .5s ease; }   /* pinned top left; hidden on the hero, shown once you scroll past it */
-  .logo.over { mix-blend-mode: difference; }   /* over text the name inverts against what is beneath it, so it never melts into the copy */
+  .top { position: fixed; inset: 0 0 auto 0; z-index: 5; display: flex; justify-content: flex-end; align-items: center; gap: 1.5rem; height: 4.6rem; box-sizing: border-box; padding: 0 var(--pad); }
+  .logo { text-decoration: none; font-size: clamp(1.1rem, 2.8vw, 1.7rem); line-height: 1.2; position: fixed; left: var(--pad); top: 2.3rem; transform: translateY(-50%); z-index: 6; max-width: 50vw; opacity: 1; pointer-events: auto; transition: opacity .5s ease; }   /* pinned top left; hidden on the hero, shown once you scroll past it */
+  .logo.over { mix-blend-mode: difference; }   /* over text the name inverts against what is beneath it, so it never melts into the copy */   /* over text the name inverts against what is beneath it, so it never melts into the copy */
   .logo.show { opacity: 1; pointer-events: auto; }
-  .namebar { position: fixed; top: 0; left: 0; right: 0; z-index: 4; height: calc(max(calc(var(--pad) * .8), env(safe-area-inset-top)) + clamp(1.1rem, 2.8vw, 1.7rem) * 1.2 + var(--pad) * .8); background: transparent; opacity: 0; pointer-events: none; transition: opacity .5s ease; }   /* strip behind the pinned name: transparent */
-  .namebar.show { opacity: 1; }
+  .namebar { display: none; }   /* the frosted glass bar is removed; the name and nav sit directly on the page */
   .logo::before { content: ""; position: absolute; inset: -95% -45%; z-index: -1; background: var(--glow, #2f6bff); opacity: 0; -webkit-mask-image: radial-gradient(ellipse at center, #000 0%, transparent 68%); mask-image: radial-gradient(ellipse at center, #000 0%, transparent 68%); transition: background-color .4s ease, opacity 1.6s ease; }
   .logo.glow::before { opacity: .4; transition: background-color .4s ease, opacity .3s ease; }
   /* While a song plays, its colors drift across the whole screen (behind the content). Blob colors are set from the song in JS. */
@@ -47,8 +46,8 @@
   .plain #score, #flow.on ~ #score { display: none; }
   #aura { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
   .orb { position: absolute; border-radius: 50%; opacity: 0; filter: blur(6px); }
-  nav { text-align: right; flex: 0 1 auto; max-width: min(46vw, 21rem); }
-  nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: flex-end; gap: .15rem; }
+  nav { text-align: right; flex: 0 1 auto; max-width: none; }
+  nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: flex-end; gap: .1rem; }
   nav a { display: block; text-decoration: none; font-size: 1.05rem; line-height: 1.35; font-weight: 400; padding: .1rem 0; }
 
   /* ---------- Hero ---------- */
@@ -142,7 +141,11 @@
   footer { gap: 1.5rem; }
   footer .up { display: grid; place-items: center; width: 44px; height: 44px; margin: -10px -10px 0 0; align-self: flex-start; opacity: .8; transition: opacity .3s, transform .3s; }
   footer .up:hover, footer .up:focus-visible { opacity: 1; transform: translateY(-2px); }
-  footer .social.inline { margin: 0; align-self: flex-start; justify-content: center; gap: .5rem; }
+  footer > span:first-child { flex: 1 1 auto; }
+  footer .social.inline { order: 2; }
+  footer .up { order: 3; margin: -10px -10px 0 0; }   /* the caret's arrow, not its tap area, lines up with the right edge */
+  footer .social.inline { margin: 0 0 0 auto; align-self: flex-start; justify-content: flex-end; gap: .5rem; }   /* icons sit at the right edge, next to the caret, at every width */
+  @media (max-width: 600px) { footer { flex-wrap: wrap; row-gap: .5rem; } footer > span:first-child { flex-basis: 100%; } footer .social.inline { margin-left: auto; } }
   footer .social.inline a:first-child { margin-left: 0; }
   footer .made { display: block; margin-top: .35rem; font-size: .78rem; }
 
